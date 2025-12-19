@@ -1,0 +1,22 @@
+/* src/components/Common/Header.css */
+
+.app-header {
+    /* Figma 디자인의 보라색 (#A36AE3으로 추정) */
+    background-color: #A36AE3; 
+    height: 120px; 
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center; 
+    /* 하단 모서리를 둥글게 처리 (Figma 디자인 반영) */
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+}
+
+.header-title {
+    color: white;
+    font-size: 32px;
+    font-weight: bold;
+    /* 텍스트 위치를 중앙에서 살짝 내립니다. */
+    margin-top: 30px; 
+}

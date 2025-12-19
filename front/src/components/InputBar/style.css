@@ -1,0 +1,47 @@
+.input-bar {
+  align-items: center;
+  background-color: #EEE6FF;
+  /* 연한 보라색 배경 */
+  border-radius: 100px;
+  /* Pill shape */
+  box-shadow: 0px 4px 4px #0000001a;
+  display: flex;
+  flex-direction: row;
+  /* 가로 정렬 */
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 20px;
+  width: 100%;
+  /* 부모 컨테이너에 맞춤 */
+  height: 50px;
+  box-sizing: border-box;
+}
+
+.input-bar .text-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: "Inter-Regular", Helvetica;
+  font-size: 16px;
+  color: #000;
+  width: 100%;
+  flex: 1;
+}
+
+.input-bar .text-input::placeholder {
+  color: #909090;
+}
+
+.input-bar .icon-stroke-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.input-bar .icon-stroke {
+  width: 24px;
+  height: 24px;
+  opacity: 0.6;
+}

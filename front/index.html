@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+  <title>MediPIN</title>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=ADLaM+Display&family=Cairo:wght@200&family=Inter:wght@400;500;700;800&display=swap"
+    rel="stylesheet" />
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css" />
+
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+
+      /* ⭐ 전역 기본 폰트 지정 (핵심) */
+      font-family: "Inter", Helvetica, Arial, sans-serif;
+
+      background-color: #111;
+      /* 양옆 배경 */
+      display: flex;
+      justify-content: center;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 390px;
+      /* 📱 모바일 기준 */
+      min-height: 100vh;
+      background-color: #fff;
+      overflow-x: hidden;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app"></div>
+  <script
+    src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=58c2d81606706636fa0da52556cc0b24&autoload=false&libraries=clusterer,services"></script>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+
+</html>

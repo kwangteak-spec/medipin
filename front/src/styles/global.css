@@ -1,0 +1,31 @@
+/* ===============================
+   MOBILE FULL WIDTH OVERRIDE
+   =============================== */
+
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+#app {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+}
+
+/* App.jsx wrapper */
+.App {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* ❌ Figma 웹 프레임 제거 */
+body {
+  display: block !important;
+}

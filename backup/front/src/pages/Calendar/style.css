@@ -1,0 +1,15 @@
+.calendar-main {
+    background-color: #ffffff;
+    min-height: 852px;
+    min-width: 393px;
+    position: relative;
+    width: 100%;
+}
+
+.calendar-main .icon-feathericons {
+    height: 24px !important;
+    left: 331px !important;
+    position: absolute !important;
+    top: 439px !important;
+    width: 24px !important;
+}

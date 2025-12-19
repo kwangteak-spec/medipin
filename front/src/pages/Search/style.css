@@ -1,0 +1,169 @@
+.search {
+  background-color: #f9f9fb;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  min-height: 852px;
+  min-width: 393px;
+  width: 100%;
+}
+
+.search .header {
+  align-self: center !important;
+  left: unset !important;
+  top: unset !important;
+}
+
+.search .frame-2 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 31px;
+
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+}
+
+
+.search .frame-wrapper {
+  align-items: center;
+  align-self: stretch;
+  display: flex;
+  flex: 0 0 auto;
+  gap: 10px;
+  justify-content: space-around;
+  padding: 4px 10px;
+  position: relative;
+  width: 100%;
+}
+
+.search .frame-3 {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-left: -9.50px;
+  margin-right: -9.50px;
+  position: relative;
+  width: 292px;
+}
+
+.search .div-wrapper {
+  align-items: flex-start;
+  align-self: stretch;
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 24px;
+  position: relative;
+  width: 100%;
+}
+
+.search .frame-4 {
+  align-items: flex-start;
+  align-self: stretch;
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 20px;
+  position: relative;
+  width: 100%;
+}
+
+.search .frame-5 {
+  align-items: center;
+  align-self: stretch;
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+  width: 100%;
+}
+
+.search .text-wrapper-3 {
+  align-self: stretch;
+  color: #9f63ff;
+  font-family: "Inter", Helvetica, Arial, sans-serif;;
+  font-size: 25px;
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 35.0px;
+  margin-top: -1.00px;
+  position: relative;
+  margin-left: -10px;
+}
+
+.search .input-bar {
+  flex: 0 0 auto !important;
+  left: unset !important;
+  top: unset !important;
+}
+
+.search .frame-6 {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+}
+
+.search .history-row {
+  width: 290px;                 /* ✅ inputbar와 동일 */
+  height: 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* ✅ 양 옆 배치 */
+
+  padding: 0 16px;
+  box-sizing: border-box;
+
+  cursor: pointer;
+}
+
+/* 🔹 검색어 텍스트 */
+.search .history-text {
+  font-size: 14px;
+  color: #979797;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.search .frame-7 {
+  align-items: center;
+  align-self: stretch;
+  display: flex;
+  flex: 0 0 auto;
+  justify-content: flex-start;
+  gap: 200px;
+  padding: 0px 12px;
+  position: relative;
+  width: 100%;
+}
+
+.search .text-wrapper-4 {
+  color: #979797;
+  font-family: "Inter-Regular", Helvetica;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 19.6px;
+  margin-top: -1.00px;
+  position: relative;
+  white-space: nowrap;
+  width: fit-content;
+}
+
+.search .trash-icon {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  opacity: 0.6;
+}
+
+.search .trash-icon:hover {
+  opacity: 1;
+}

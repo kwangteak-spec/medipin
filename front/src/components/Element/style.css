@@ -1,0 +1,77 @@
+/* =========================
+   공통 헤더 컨테이너
+========================= */
+.element {
+  width: 393px;
+  background-color: #9f63ff;
+  border-radius: 0 0 40px 40px;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+/* =========================
+   헤더 상단 (로고 영역)
+========================= */
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 10px;
+}
+
+.logo {
+  color: #f5f5f5;
+  font-family: "ADLaM Display", Helvetica, sans-serif;
+  font-size: 35px;
+  line-height: 35px;
+  white-space: nowrap;
+}
+
+/* =========================
+   알림 아이콘
+========================= */
+.icon-wrapper {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-alarm {
+  width: 24px;
+  height: 24px;
+  background-image: url("./alarm_icon.svg");
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+
+/* =========================
+   검색바
+========================= */
+.header-search {
+  margin-top: 12px;
+}
+
+/* =========================
+   헤더 타입별 스타일
+========================= */
+
+/* 🔹 1. 로그인 헤더 (로고만) */
+.element--simple {
+  height: 80px;
+  padding: 28px 16px;
+}
+
+/* 🔹 2. 알림 헤더 (로고 + 알림) */
+.element--alarm {
+  height: 100px;
+  padding: 32px 16px;
+}
+
+/* 🔹 3. 검색 헤더 (로고 + 알림 + 검색) */
+.element--search {
+  height: 167px;
+  padding: 32px 16px 20px;
+}

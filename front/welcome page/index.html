@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEDIPIN Welcome Page</title>
+    <style>
+        /* CSS: 기본 레이아웃 및 애니메이션 정의 (이전 코드와 동일) */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: white;
+            cursor: pointer;
+            font-family: sans-serif;
+            color: #333;
+        }
+
+        .video-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .video-element {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            display: block;
+        }
+
+        #frontVideo {
+            display: none;
+        }
+
+        #tapToStart {
+            position: absolute;
+            bottom: 10%;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #6a0dad;
+            user-select: none;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        @keyframes shimmer {
+            0% { opacity: 0.5; transform: scale(1.0); }
+            50% { opacity: 1.0; transform: scale(1.05); }
+            100% { opacity: 0.5; transform: scale(1.0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="video-container" id="welcomePage">
+        <video id="sideVideo" class="video-element" autoplay loop muted playsinline>
+            <source src="side.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+
+        <video id="frontVideo" class="video-element" muted playsinline>
+            <source src="front.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+
+        <div id="tapToStart">Tap to Start</div>
+    </div>
+
+    <script>
+        // JavaScript: 클릭 이벤트 및 페이지 로직 처리
+        const welcomePage = document.getElementById('welcomePage');
+        const sideVideo = document.getElementById('sideVideo');
+        const frontVideo = document.getElementById('frontVideo');
+        const tapToStart = document.getElementById('tapToStart');
+        
+        let pageStage = 1; // 1: 옆모습, 2: 앞모습, 3: 완료
+        const LOGIN_PAGE_URL = 'login.html'; 
+
+        // 로그인 화면으로 전환하는 함수
+        function goToLogin() {
+            if (pageStage < 3) {
+                pageStage = 3;
+                console.log("Navigating to login page...");
+                // 300ms 딜레이를 주어 전환이 자연스럽게 보이게 함
+                setTimeout(() => {
+                    window.location.href = LOGIN_PAGE_URL;
+                }, 300); 
+            }
+        }
+
+        // 비디오 재생 시작 및 Tap to Start 표시
+        function startInitialState() {
+            sideVideo.play().catch(error => {
+                console.log("Side video autoplay failed, user interaction needed:", error);
+            });
+            tapToStart.style.opacity = '1';
+            tapToStart.style.animation = 'shimmer 1.5s infinite ease-in-out';
+        }
+
+        // --- 핵심 로직: 앞모습 영상 재생 중일 때 자동 전환 및 건너뛰기 ---
+
+        // 1. 앞모습 영상 종료 이벤트 (자동 로그인 전환)
+        frontVideo.addEventListener('ended', () => {
+            console.log("Front video ended, navigating to login automatically.");
+            goToLogin();
+        });
+
+        // 2. 전체 페이지 클릭/터치 이벤트
+        welcomePage.addEventListener('click', () => {
+            if (pageStage === 1) {
+                // Stage 1: 옆모습 -> Stage 2: 앞모습 전환
+                
+                tapToStart.style.animation = 'none';
+                tapToStart.style.opacity = '0';
+                
+                sideVideo.pause();
+                sideVideo.style.display = 'none';
+
+                frontVideo.style.display = 'block';
+                frontVideo.currentTime = 0; // 영상 시작 지점으로 리셋
+
+                // **중요 수정:** 사용자 클릭 후 frontVideo.play()를 호출하여 Autoplay 정책 회피
+                frontVideo.play().then(() => {
+                    console.log("Front video started successfully.");
+                }).catch(error => {
+                    console.error("Front video play failed (Autoplay policy or other issue):", error);
+                    // 실패 시에도 상태는 업데이트하여 터치 건너뛰기 준비
+                });
+                
+                pageStage = 2;
+                
+            } else if (pageStage === 2) {
+                // Stage 2: 앞모습 재생 중 -> 로그인 페이지로 빠른 전환 (터치로 바로 넘어가기)
+                console.log("Fast-forward requested by user touch.");
+                frontVideo.pause();
+                goToLogin();
+            }
+        });
+
+        // 페이지 로드 시 초기 상태 설정
+        window.onload = startInitialState;
+    </script>
+</body>
+</html>

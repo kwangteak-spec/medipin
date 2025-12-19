@@ -1,0 +1,24 @@
+// OCR 처방전 인식 결과
+
+{
+  "type": "prescription",
+  "confidence": {
+    "score": 78,
+    "level": "MEDIUM",
+    "message": "인식 정확도가 보통입니다."
+  },
+  "parsed_prescription": {
+    "medicines": [
+      {
+        "name": "씬지록신",
+        "dose": "1정",
+        "frequency": "1일 2회",
+        "timing": ["아침", "저녁"],
+        "meal_relation": "식후 30분",
+        "days": 7
+      }
+    ],
+    "doctor": "울산대학교병원",
+    "date": "2024-11-27"
+  }
+}

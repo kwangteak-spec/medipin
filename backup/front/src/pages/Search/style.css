@@ -1,0 +1,68 @@
+/* style.css (Search.jsx용 CSS) */
+
+/* 1. 전체 컨테이너 (.search) - 플로우 레이아웃 유지 */
+.search {
+    background-color: #f9f9fb;
+    display: flex;
+    flex-direction: column; 
+    /* gap: 28px; (주석 처리) */
+    min-height: 100vh; 
+    position: relative; 
+}
+
+/* 🚨 2. 검색 입력 영역 (.search-input-area) - 플로우 중앙 정렬 유지 */
+.search-input-area {
+    /* 🚨 중앙 정렬: 플로우 기반 (헤더 아래) */
+    width: 50%; 
+    max-width: 600px; /* SearchMain과 동일한 넓이 */
+    display: flex; 
+    gap: 10px;
+    
+    /* 중앙 정렬 및 헤더 아래 간격 */
+    margin: 200px auto 0 auto; 
+}
+
+
+/* --- 3. 🚨 UI 스타일 통일: SearchMain의 UI 속성 복사 적용 --- */
+
+/* 3-A. 검색 입력 필드 (input) */
+.search-input-area .search-input {
+    flex-grow: 1; 
+    
+    /* SearchMain UI 속성 복사 */
+    padding: 10px 16px; /* SearchMain의 frame-6과 동일 */
+    border-radius: 20px; /* SearchMain과 동일 */
+    background-color: #fff; /* SearchMain과 동일 (흰색 배경) */
+    border: 1px solid #ccc; /* 테두리 색상 통일 */
+    font-size: 14px;
+}
+
+/* 3-B. 검색 버튼 (button) */
+.search-input-area .search-button {
+    /* SearchMain UI 속성 복사 */
+    background-color: #9f63ff; /* 보라색 (#9f63ff) 통일 */
+    color: white;
+    font-weight: bold;
+    border: none;
+    border-radius: 20px;
+    padding: 10px 20px;
+    cursor: pointer;
+    box-shadow: 0px 4px 4px #00000040; /* SearchMain과 동일 */
+}
+
+
+/* 4. 검색 콘텐츠 영역 (.search-content-area) - 중앙 정렬 */
+.search-content-area {
+    /* 검색창과 동일하게 중앙 정렬 및 가로폭 제한 */
+    margin: 0 auto; 
+    max-width: 600px; /* 검색창 max-width와 동일하게 맞춤 */
+    width: 100%;
+    
+    /* ... (나머지 검색 기록 스타일 유지) ... */
+}
+
+.frame-7 {
+  width: 50%;
+  max-width: 600px;     /* 검색창과 동일 */
+  margin: 24px auto 0; /* 중앙 정렬 */
+}

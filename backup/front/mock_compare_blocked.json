@@ -1,0 +1,20 @@
+// 처방전 vs 약봉투 비교 결과 (위험)
+
+{
+  "comparison": {
+    "is_safe": false,
+    "matched": [],
+    "mismatches": [
+      {
+        "drug": "씬지록신",
+        "issue": "복용량 불일치",
+        "prescription": "1정",
+        "medicine_bag": "0.5정"
+      }
+    ]
+  },
+  "alert_level": {
+    "level": "BLOCKED",
+    "reason": "처방전과 약봉투 내용이 일치하지 않습니다."
+  }
+}

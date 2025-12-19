@@ -1,0 +1,77 @@
+.search-main {
+  background-color: #f9f9fb;
+  min-height: 852px;
+  min-width: 393px;
+  position: relative;
+}
+
+/* UI 위치 (Figma 기준) */
+.search-ui {
+  position: absolute;
+  top: 260px;
+  left: 50%;
+  transform: translateX(-42%);
+  width: 361px;
+}
+
+/* Search 텍스트 */
+.search-title {
+  color: #9f63ff;
+  font-family: "Inter", Helvetica;
+  font-size: 24px;
+  font-weight: 800;
+  margin-bottom: 16px;
+}
+/* 검색바 + 스캔 아이콘 */
+.search-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* InputBar 위치 보정 */
+.inputbar-reset .input-bar {
+  left: 0 !important;
+  top: 0 !important;
+}
+
+.inputbar-reset .frame {
+  flex-direction: row !important;
+  align-items: center;
+}
+
+/* ✅ scan 버튼: InputBar와 동일한 "외곽 크기" */
+.scan-icon {
+  width: 46px;          /* ← InputBar 전체 높이와 맞춤 */
+  height: 46px;         /* ← 가로 = 세로 */
+  background-color: #eee6ff;
+  border-radius: 50%;
+  cursor: pointer;
+
+  /* 🔥 padding을 안쪽으로 */
+  box-sizing: border-box;
+  padding: 10px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: visible; /* 🔥 핵심 */
+}
+
+/* 아이콘 크기 고정 */
+.scan-icon img {
+  width: 24px;
+  height: 24px;
+}
+
+.search-main {
+  background-color: #f9f9fb;
+  min-height: 852px;
+  min-width: 393px;
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;   /* 🔥 핵심 */
+}

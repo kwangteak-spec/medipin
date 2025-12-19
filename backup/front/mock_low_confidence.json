@@ -1,0 +1,14 @@
+// OCR 신뢰도 낮음 (주의 UI 테스트용)
+{
+  "type": "medicine_bag",
+  "confidence": {
+    "score": 42,
+    "level": "LOW",
+    "message": "인식 정확도가 낮습니다. 반드시 직접 확인하세요."
+  },
+  "alert_level": {
+    "level": "WARNING",
+    "reason": "OCR 인식 정확도가 낮습니다."
+  },
+  "calendar_events": []
+}

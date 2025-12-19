@@ -1,0 +1,40 @@
+.element {
+  align-items: flex-start;
+  background-color: #9f63ff;
+  border-radius: 0px 0px 40px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 100px;
+  left: 20px;
+  padding: 50px 13px 27px;
+  position: relative;
+  top: 20px;
+  width: 393px;
+}
+
+.element .frame {
+  align-items: flex-start;
+  display: flex;
+  flex: 0 0 auto;
+  gap: 183px;
+  justify-content: space-around;
+  margin-bottom: -12.00px;
+  padding: 0px 0px 0px 10px;
+  position: relative;
+  width: 163px;
+}
+
+.element .text-wrapper {
+  color: #f5f5f5;
+  font-family: "ADLaM Display", Helvetica;
+  font-size: 35px;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 35px;
+  margin-top: -1.00px;
+  position: relative;
+  text-align: center;
+  white-space: nowrap;
+  width: fit-content;
+}

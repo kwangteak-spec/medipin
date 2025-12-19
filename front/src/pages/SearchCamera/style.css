@@ -1,0 +1,85 @@
+.search-camera {
+  background-color: #d7d7d7;
+  min-height: 852px;
+  min-width: 393px;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+}
+
+.search-camera .rectangle {
+  background-color: #3a3a3a99;
+  height: 852px;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 393px;
+}
+
+.search-camera .bottom-drawer {
+  background-color: #00000080;
+  bottom: 1px;
+  height: 203px;
+  left: 0;
+  position: absolute;
+  width: 100%;
+}
+
+.search-camera .icon-shutter {
+  bottom: 79px;
+  height: 72px;
+  left: calc(50.00% - 36px);
+  position: absolute;
+  width: 72px;
+}
+
+.search-camera .action-rotate {
+  align-items: center;
+  background-color: #ffffff33;
+  border-radius: 100px;
+  bottom: 92px;
+  display: flex;
+  height: 48px;
+  justify-content: center;
+  overflow: hidden;
+  position: absolute;
+  right: 20px;
+  width: 48px;
+}
+
+.search-camera .arrow-triangle {
+  height: 21.67px;
+  margin-left: 0;
+  margin-top: -0.3px;
+  width: 26.04px;
+}
+
+.search-camera .search-switcher-instance {
+  left: calc(50.00% - 122px) !important;
+  position: absolute !important;
+  top: 64px !important;
+}
+
+.camera-preview {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+.icon-shutter {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background-color: white;
+  border: 4px solid rgba(0, 0, 0, 0.2);
+  margin: 0 auto;
+  cursor: pointer;
+}
+
+.icon-shutter:active {
+  transform: scale(0.95);
+}

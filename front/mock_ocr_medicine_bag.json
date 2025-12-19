@@ -1,0 +1,52 @@
+// OCR 약봉투 인식 결과 (정상) 
+
+{
+  "type": "medicine_bag",
+  "confidence": {
+    "score": 87,
+    "level": "HIGH",
+    "message": "인식 정확도가 높습니다."
+  },
+  "parsed_medication": {
+    "medicines": [
+      {
+        "name": "씬지록신",
+        "dose": "1정",
+        "frequency": "1일 2회",
+        "timing": ["아침", "저녁"],
+        "meal_relation": "식후 30분",
+        "days": 7
+      }
+    ]
+  },
+  "schedule": [
+    {
+      "time": "09:30",
+      "label": "아침 복용"
+    },
+    {
+      "time": "19:30",
+      "label": "저녁 복용"
+    }
+  ],
+  "calendar_events": [
+    {
+      "datetime": "2025-01-01T09:30",
+      "date": "2025-01-01",
+      "time": "09:30",
+      "title": "아침 복용",
+      "notify": true,
+      "alert_level": "NORMAL",
+      "alert_reason": null
+    },
+    {
+      "datetime": "2025-01-01T19:30",
+      "date": "2025-01-01",
+      "time": "19:30",
+      "title": "저녁 복용",
+      "notify": true,
+      "alert_level": "NORMAL",
+      "alert_reason": null
+    }
+  ]
+}

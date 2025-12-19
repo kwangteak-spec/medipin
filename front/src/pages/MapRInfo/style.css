@@ -1,0 +1,156 @@
+.map-r-info {
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+    background-color: #f9f9f9;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 상단 헤더 영역 (보라색 배경) */
+/* 상단 헤더 영역 (보라색 배경) */
+.map-r-info .top-header {
+    background-color: #9F63FF;
+    padding: 20px 20px 80px 20px;
+    /* 카드가 겹칠 공간 확보 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.map-r-info .header-nav {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 10px;
+}
+
+.map-r-info .back-btn {
+    width: 40px;
+    height: 40px;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.map-r-info .back-btn img {
+    width: 20px;
+    height: 20px;
+}
+
+.map-r-info .header-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff;
+}
+
+/* ✅ 사진 영역 (이제 카드 내부) */
+.map-r-info .photo-area {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 24px;
+    /* 정보와 간격 */
+}
+
+/* 사진(플레이스홀더) */
+.map-r-info .main-image-placeholder {
+    width: 200px;
+    height: 200px;
+    background-color: #f0f0f0;
+    border-radius: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #fff;
+    border: 1px solid #eee;
+    /* 구분선 약간 */
+}
+
+/* 상세 정보 카드 */
+.map-r-info .info-card {
+    background-color: #fff;
+    flex: 1;
+
+    /* 헤더 위로 겹치기 */
+    margin-top: -40px;
+
+    border-top-left-radius: 40px;
+    border-top-right-radius: 40px;
+
+    padding: 30px 24px 100px 24px;
+
+    display: flex;
+    flex-direction: column;
+    /* gap 제거 또는 조정. photo-area가 margin-bottom 가짐 */
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
+    z-index: 4;
+}
+
+.map-r-info .info-header h2 {
+    font-size: 22px;
+    font-weight: 800;
+    margin: 0;
+    color: #000;
+    margin: 0 0 16px 0;
+}
+
+.map-r-info .info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.map-r-info .info-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.icon-wrapper {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #333;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.info-content {
+    font-size: 14px;
+    color: #333;
+    line-height: 1.5;
+    word-break: break-all;
+}
+
+.text-gray {
+    color: #666;
+    font-size: 13px;
+}
+
+.status-badge {
+    font-weight: 700;
+    color: #000;
+    margin-right: 4px;
+}
+
+.extra-info {
+    font-size: 13px;
+    color: #666;
+    margin-top: 10px;
+}
+
+.map-r-info .bottom-nav-container {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    z-index: 100;
+}

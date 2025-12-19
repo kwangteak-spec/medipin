@@ -1,0 +1,90 @@
+/* =========================
+   Filter Icon Group
+   (가로 스와이프 가능)
+========================= */
+.filter-icon-group {
+  display: flex;
+  align-items: center;
+
+  width: 100%;
+  padding: 10px 4px;
+  /* ⭐ 그림자 잘림 방지용 여백 확보 */
+  gap: 12px;
+
+  overflow-x: auto;
+  /* 가로 스크롤 */
+  overflow-y: hidden;
+  white-space: nowrap;
+
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+
+  background-color: transparent;
+}
+
+/* Chrome / Safari 스크롤바 숨김 */
+.filter-icon-group::-webkit-scrollbar {
+  display: none;
+}
+
+/* =========================
+   아이콘 + 텍스트 하나의 칩
+========================= */
+.filter-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 8px 14px;
+  border-radius: 100px;
+  /* 둥근 칩 스타일 */
+
+  cursor: pointer;
+  flex-shrink: 0;
+
+  background-color: #ffffff;
+  /* 기본 흰색 배경 */
+  color: #000;
+  border: 1px solid #f0f0f0;
+  /* 미세한 테두리 */
+
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+/* =========================
+   아이콘
+========================= */
+.filter-item .icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  transition: all 0.2s ease;
+  /* 기본 상태: 원본 유지 */
+}
+
+/* =========================
+   텍스트
+========================= */
+.filter-item .label {
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* =========================
+   active 상태
+========================= */
+.filter-item.active {
+  background-color: #9F63FF;
+  /* 활성 상태 보라색 */
+  color: #000 !important;
+  /* ⭐ 텍스트 흰색 강제 */
+  border-color: #9F63FF;
+  box-shadow: 0 4px 8px rgba(159, 99, 255, 0.3);
+}
+
+.filter-item.active .icon {
+  filter: brightness(0) invert(1);
+  /* ⭐ 아이콘 흰색으로 변경 */
+}

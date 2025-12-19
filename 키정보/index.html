@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedChecker - 약물 안전성 검사</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for a modern look */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', 'Malgun Gothic', sans-serif;
+            background-color: #f8fafc; /* Light gray background */
+        }
+        .container-card {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .warning {
+            border-left: 4px solid #f97316; /* Orange border */
+        }
+        .caution {
+            border-left: 4px solid #facc15; /* Yellow border */
+        }
+        .safe {
+            border-left: 4px solid #10b981; /* Green border */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="min-h-screen p-4 sm:p-8">
+        <header class="text-center py-6 bg-white rounded-xl container-card mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">💊 MedChecker: 처방 안전성 검사</h1>
+            <p class="text-gray-500 mt-1">노인주의 및 병용 금기 약물 위험성 확인</p>
+        </header>
+
+        <main class="max-w-4xl mx-auto space-y-8">
+            
+            <!-- 탭 네비게이션 -->
+            <div class="flex border-b border-gray-200">
+                <button id="tab-geriatric" onclick="showTab('geriatric')" class="px-4 py-3 text-sm font-medium rounded-t-lg transition-colors duration-200" style="width: 50%;">
+                    노인주의 약물 검사
+                </button>
+                <button id="tab-concurrent" onclick="showTab('concurrent')" class="px-4 py-3 text-sm font-medium rounded-t-lg transition-colors duration-200" style="width: 50%;">
+                    병용 금기 약물 검사
+                </button>
+            </div>
+
+            <!-- 1. 노인주의 약물 검사 탭 -->
+            <div id="content-geriatric" class="tab-content bg-white p-6 rounded-xl container-card space-y-6">
+                <h2 class="text-xl font-semibold text-gray-700">고령 환자 처방 주의 확인</h2>
+                
+                <div>
+                    <label for="geriatric-drug-name" class="block text-sm font-medium text-gray-700 mb-1">약품명 입력 (예: 빅손정, 폴라리스정)</label>
+                    <input type="text" id="geriatric-drug-name" placeholder="약품명을 입력하세요" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-sky-500 focus:border-sky-500 transition-colors">
+                </div>
+                
+                <button onclick="checkGeriatricRisk()" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-200 shadow-md">
+                    ⚠️ 노인 위험성 검사
+                </button>
+
+                <div id="geriatric-results" class="mt-4 p-4 rounded-lg bg-gray-50 min-h-[100px]">
+                    <p class="text-gray-500">검사를 시작하려면 약품명을 입력하세요.</p>
+                </div>
+            </div>
+
+            <!-- 2. 병용 금기 약물 검사 탭 -->
+            <div id="content-concurrent" class="tab-content bg-white p-6 rounded-xl container-card space-y-6 hidden">
+                <h2 class="text-xl font-semibold text-gray-700">약물 상호작용(병용 금기) 확인</h2>
+                
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <div class="w-full sm:w-1/2">
+                        <label for="concurrent-drug1" class="block text-sm font-medium text-gray-700 mb-1">첫 번째 약품명 (예: 제클라정)</label>
+                        <input type="text" id="concurrent-drug1" placeholder="약품명 1" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-sky-500 focus:border-sky-500 transition-colors">
+                    </div>
+                    <div class="w-full sm:w-1/2">
+                        <label for="concurrent-drug2" class="block text-sm font-medium text-gray-700 mb-1">두 번째 약품명 (예: 심바로드정)</label>
+                        <input type="text" id="concurrent-drug2" placeholder="약품명 2" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-sky-500 focus:border-sky-500 transition-colors">
+                    </div>
+                </div>
+                
+                <button onclick="checkConcurrentRisk()" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-200 shadow-md">
+                    🚫 병용 금기 위험성 검사
+                </button>
+
+                <div id="concurrent-results" class="mt-4 p-4 rounded-lg bg-gray-50 min-h-[100px]">
+                    <p class="text-gray-500">두 약품명을 모두 입력하고 검사를 시작하세요.</p>
+                </div>
+            </div>
+            
+        </main>
+    </div>
+
+    <script>
+        // =======================================================
+        // 모의(Mock) 데이터 - 실제 파일(CSV) 대신 사용됩니다.
+        // =======================================================
+
+        // 1. 노인 주의 약물 데이터 (한국의약품안전관리원_노인주의약물_20240813.csv 기반)
+        const geriatricCautionData = [
+            { name: "빅손정", ingredient: "ethyl loflazepate", caution: "인지기능 저하, 섬망, 낙상, 골절 위험. 장기 작용 벤조다이아제핀 사용 추천 안함." },
+            { name: "대원디아제팜주사액", ingredient: "diazepam", caution: "인지기능 저하, 섬망, 낙상, 골절 위험. 장기 작용 벤조다이아제핀 사용 추천 안함." },
+            { name: "폴라리스정", ingredient: "amisulpride", caution: "저혈압, 진정 위험 야기. 치매 고령환자에게 항정신병약물 투여시 뇌혈관질환(뇌졸중), 사망 위험 증가." },
+            { name: "아칸솔정", ingredient: "amisulpride", caution: "저혈압, 진정 위험 야기. 치매 고령환자에게 항정신병약물 투여시 뇌혈관질환(뇌졸중), 사망 위험 증가." },
+            { name: "타이레놀", ingredient: "acetaminophen", caution: "정보 없음 (일반적인 처방 가이드라인에 따름)." } // 안전한 약물 예시
+        ];
+
+        // 2. 병용 금기 약물 데이터 (한국의약품안전관리원_병용금기약물_5줄.csv 기반)
+        const concurrentContraindicationData = [
+            // clarithromycin + simvastatin
+            { drug1: "제클라정", drug2: "심바로드정20밀리그람", reason: "근병증, 횡문근융해의 위험 증가" },
+            { drug1: "제클라정", drug2: "심바스트정20밀리그램", reason: "근병증, 횡문근융해의 위험 증가" },
+            // 역순 테스트를 위한 데이터
+            { drug1: "프로자이정", drug2: "리나치정", reason: "중추신경계 부작용 위험 증가" }, 
+            { drug1: "리나치정", drug2: "프로자이정", reason: "중추신경계 부작용 위험 증가" } 
+        ];
+
+        // =======================================================
+        // UI 로직
+        // =======================================================
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // 초기 탭 설정
+            showTab('geriatric'); 
+        });
+
+        /**
+         * 탭 전환 기능
+         * @param {string} tabName - 'geriatric' 또는 'concurrent'
+         */
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('button[id^="tab-"]').forEach(btn => 
+                btn.classList.remove('text-sky-600', 'border-sky-600', 'bg-sky-50', 'border-b-2', 'font-semibold')
+            );
+
+            const content = document.getElementById(`content-${tabName}`);
+            const button = document.getElementById(`tab-${tabName}`);
+
+            if (content && button) {
+                content.classList.remove('hidden');
+                button.classList.add('text-sky-600', 'border-sky-600', 'bg-sky-50', 'border-b-2', 'font-semibold');
+            }
+        }
+
+
+        // =======================================================
+        // 1. 노인 주의 약물 검사 로직
+        // =======================================================
+
+        function checkGeriatricRisk() {
+            const drugNameInput = document.getElementById('geriatric-drug-name').value.trim();

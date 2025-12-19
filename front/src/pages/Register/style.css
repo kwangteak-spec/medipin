@@ -1,0 +1,86 @@
+.register {
+  background-color: #f9f9fb;
+  min-height: 100vh;
+  width: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.register .frame-2 {
+  margin-top: 120px;
+  width: 293px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.register .frame-3 {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.register .text-wrapper-2 {
+  color: #9f63ff;
+  font-size: 25px;
+  font-weight: 800;
+}
+
+/* 입력 영역 */
+.register .frame-4 {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.register .frame-5 {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.input-wrap {
+  position: relative;
+  height: 24px;
+}
+
+.input-wrap input {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 15px;
+  color: #000;
+  position: relative;
+  z-index: 2;
+}
+
+.input-wrap span {
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-size: 14px;
+  color: #909090;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.line {
+  width: 100%;
+  height: 1px;
+  margin-top: 6px;
+}
+
+/* 버튼 */
+.register .button-instance {
+  width: 100% !important;
+  margin-top: 10px;
+}
+
+/* Element 헤더 위치 */
+.register .element {
+  position: absolute;
+  top: 0;
+}

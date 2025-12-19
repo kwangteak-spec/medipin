@@ -1,0 +1,39 @@
+.map-main {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    background-color: #f9f9fb;
+}
+
+/* 상단 UI */
+.map-top-ui {
+    position: absolute;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20;
+}
+
+.map-ui-inner {
+    width: 361px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* 지도 */
+.kakao-map-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+}
+
+/* 하단 네비게이션 컨테이너 */
+.bottom-nav-container {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    z-index: 100;
+    /* 지도 위에 표시 */
+}

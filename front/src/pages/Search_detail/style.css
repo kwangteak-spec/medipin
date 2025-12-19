@@ -1,0 +1,138 @@
+/* =========================
+   SearchDetail 전체 페이지
+   ========================= */
+.search-detail {
+  background-color: #f9f9fb;
+  min-height: 100vh;
+  min-width: 393px;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  /* 전체 스크롤 방지 */
+}
+
+/* =========================
+   헤더
+   ========================= */
+.search-detail .header {
+  position: absolute !important;
+  top: 0 !important;
+  left: 50% !important;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
+/* =========================
+   검색어 표시 영역
+   ========================= */
+.search-detail .frame-6 {
+  position: absolute;
+  top: 112px;
+  left: 50%;
+  transform: translateX(-200%);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  width: fit-content;
+  /* 핵심 */
+}
+
+
+/* 뒤로가기 아이콘 배경 */
+.search-detail .fill-wrapper {
+  width: 40px;
+  height: 40px;
+  background-color: #eee6ff;
+  border-radius: 20px;
+  position: relative;
+  cursor: pointer;
+}
+
+/* 뒤로가기 아이콘 */
+.search-detail .fill {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 18px;
+  height: 18px;
+  transform: translate(-50%, -50%);
+}
+
+/* 검색어 텍스트 */
+.search-detail .text-wrapper-6 {
+  font-family: "Manrope", Helvetica;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 24px;
+  color: #000;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* =========================
+   검색 결과 영역 (스크롤)
+   ========================= */
+.search-detail .search-result-2 {
+  position: absolute;
+  top: 167px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  width: 342px;
+  height: calc(100vh - 320px);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  overflow-y: auto;
+  /* ✅ 내부 스크롤 */
+  padding-bottom: 20px;
+
+  /* 스크롤바 숨기기 */
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+.search-detail .search-result-2::-webkit-scrollbar {
+  display: none;
+  /* Chrome, Safari, Opera */
+}
+
+/* 결과 그리드 (2열) */
+.search-detail .frame-7 {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  /* ✅ 2열 고정 */
+  gap: 24px 20px;
+}
+
+/* =========================
+   SearchResultIn 카드 보정
+   ========================= */
+.search-detail .search-result-in-instance {
+  position: relative !important;
+  left: unset !important;
+  top: unset !important;
+}
+
+/* =========================
+   하단 Search 바
+   ========================= */
+/* =========================
+   하단 Search 바 -> HomeBar Container
+   ========================= */
+.search-detail .bottom-nav-container {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  left: 0;
+  z-index: 100;
+}

@@ -1,0 +1,63 @@
+/* style.css (search_detail.jsx의 목록 페이지용 스타일) */
+
+/* =======================================================
+   3. 검색 결과 목록 페이지 (search-list-page) 스타일
+   ======================================================= */
+
+.search-list-page {
+    /* 전체 상세 페이지와 동일한 배경 및 기본 컨테이너 속성 사용 */
+    background-color: #f9f9fb;
+    min-height: 852px;
+    position: relative;
+    width: 100%;
+}
+
+.search-list-wrapper {
+    /* 상세 페이지의 detail-content-wrapper와 유사하게 중앙 정렬 */
+    margin: 0 auto;
+    max-width: 600px;
+    padding: 20px 16px;
+    padding-top: 80px; /* 헤더 아래 여백 */
+}
+
+.list-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    text-align: left; /* 제목은 왼쪽 정렬 */
+    padding-left: 5px;
+    color: #333;
+}
+
+.search-results-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* 항목 간 간격 */
+}
+
+.result-item {
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 15px;
+    cursor: pointer; /* 클릭 가능한 항목임을 표시 */
+    transition: background-color 0.2s;
+}
+
+.result-item:hover {
+    background-color: #f0f0f0;
+}
+
+.result-item .item-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #111;
+    margin-bottom: 4px;
+}
+
+.result-item .company-name,
+.result-item .item-meta {
+    font-size: 13px;
+    color: #777;
+    margin-top: 2px;
+}

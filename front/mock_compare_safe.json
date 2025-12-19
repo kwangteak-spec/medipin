@@ -1,0 +1,23 @@
+// 처방전 vs 약봉투 비교 결과 (안전)
+
+{
+  "comparison": {
+    "is_safe": true,
+    "matched": ["씬지록신"],
+    "mismatches": []
+  },
+  "alert_level": {
+    "level": "NORMAL",
+    "reason": null
+  },
+  "schedule": [
+    {
+      "time": "09:30",
+      "label": "아침 복용"
+    },
+    {
+      "time": "19:30",
+      "label": "저녁 복용"
+    }
+  ]
+}

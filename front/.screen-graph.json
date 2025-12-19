@@ -1,0 +1,223 @@
+{
+  "nodes": [
+    {
+      "id": "src/pages/Welcome/Welcome.jsx",
+      "label": "Welcome",
+      "routes": [
+        "/",
+        "/welcome"
+      ],
+      "isRoot": true
+    },
+    {
+      "id": "src/pages/Login/Login.jsx",
+      "label": "Login",
+      "routes": [
+        "/login"
+      ]
+    },
+    {
+      "id": "src/pages/Register/Register.jsx",
+      "label": "Register",
+      "routes": [
+        "/register"
+      ]
+    },
+    {
+      "id": "src/pages/Search/Search.jsx",
+      "label": "Search",
+      "routes": [
+        "/search"
+      ]
+    },
+    {
+      "id": "src/pages/Search_detail/SearchDetail.jsx",
+      "label": "SearchDetail",
+      "routes": [
+        "/search/detail/:query",
+        "/search/detail"
+      ]
+    },
+    {
+      "id": "src/pages/Search_result_info/Search_result_info.jsx",
+      "label": "Search_result_info",
+      "routes": [
+        "/search/result/:drugId"
+      ]
+    },
+    {
+      "id": "src/pages/Search_main/SearchMain.jsx",
+      "label": "SearchMain",
+      "routes": [
+        "/search_main"
+      ]
+    },
+    {
+      "id": "src/pages/Map_main/MapMain.jsx",
+      "label": "MapMain",
+      "routes": [
+        "/map"
+      ]
+    },
+    {
+      "id": "src/pages/Chat/ChattingMain.jsx",
+      "label": "ChattingMain",
+      "routes": [
+        "/chat"
+      ]
+    },
+    {
+      "id": "src/pages/SearchCamera/SearchCamera.jsx",
+      "label": "SearchCamera",
+      "routes": [
+        "/search/camera"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "id": "src\\pages\\Login\\Login.jsx:31:8-to-src\\pages\\Search_main\\SearchMain.jsx",
+      "source": "src\\pages\\Login\\Login.jsx",
+      "target": "src\\pages\\Search_main\\SearchMain.jsx",
+      "data": {
+        "viaRoute": "/search_main",
+        "trigger": {
+          "element": "navigate(\"/search_main\")",
+          "line": 31,
+          "endLine": 31,
+          "column": 8,
+          "endColumn": 32,
+          "sourceFile": "src\\pages\\Login\\Login.jsx"
+        }
+      }
+    },
+    {
+      "id": "src\\pages\\Login\\Login.jsx:91:27-to-src\\pages\\Register\\Register.jsx",
+      "source": "src\\pages\\Login\\Login.jsx",
+      "target": "src\\pages\\Register\\Register.jsx",
+      "data": {
+        "viaRoute": "/register",
+        "trigger": {
+          "element": "navigate(\"/register\")",
+          "line": 91,
+          "endLine": 91,
+          "column": 27,
+          "endColumn": 48,
+          "sourceFile": "src\\pages\\Login\\Login.jsx"
+        }
+      }
+    },
+    {
+      "id": "src\\pages\\Register\\Register.jsx:102:6-to-src\\pages\\Login\\Login.jsx",
+      "source": "src\\pages\\Register\\Register.jsx",
+      "target": "src\\pages\\Login\\Login.jsx",
+      "data": {
+        "viaRoute": "/login",
+        "trigger": {
+          "element": "navigate(\"/login\")",
+          "line": 102,
+          "endLine": 102,
+          "column": 6,
+          "endColumn": 24,
+          "sourceFile": "src\\pages\\Register\\Register.jsx"
+        }
+      }
+    },
+    {
+      "id": "src\\pages\\Search_main\\SearchMain.jsx:22:27-to-src\\pages\\Search\\Search.jsx",
+      "source": "src\\pages\\Search_main\\SearchMain.jsx",
+      "target": "src\\pages\\Search\\Search.jsx",
+      "data": {
+        "viaRoute": "/search",
+        "trigger": {
+          "element": "navigate(\"/search\")",
+          "line": 22,
+          "endLine": 22,
+          "column": 27,
+          "endColumn": 46,
+          "sourceFile": "src\\pages\\Search_main\\SearchMain.jsx"
+        }
+      }
+    },
+    {
+      "id": "src\\pages\\Search_main\\SearchMain.jsx:32:27-to-src\\pages\\SearchCamera\\SearchCamera.jsx",
+      "source": "src\\pages\\Search_main\\SearchMain.jsx",
+      "target": "src\\pages\\SearchCamera\\SearchCamera.jsx",
+      "data": {
+        "viaRoute": "/search/camera",
+        "trigger": {
+          "element": "navigate(\"/search/camera\")",
+          "line": 32,
+          "endLine": 32,
+          "column": 27,
+          "endColumn": 53,
+          "sourceFile": "src\\pages\\Search_main\\SearchMain.jsx"
+        }
+      }
+    },
+    {
+      "id": "src\\pages\\Chat\\ChattingMain.jsx:35:6-to-src\\pages\\Login\\Login.jsx",
+      "source": "src\\pages\\Chat\\ChattingMain.jsx",
+      "target": "src\\pages\\Login\\Login.jsx",
+      "data": {
+        "viaRoute": "/login",
+        "trigger": {
+          "element": "navigate(\"/login\")",
+          "line": 35,
+          "endLine": 35,
+          "column": 6,
+          "endColumn": 24,
+          "sourceFile": "src\\pages\\Chat\\ChattingMain.jsx"
+        }
+      }
+    },
+    {
+      "id": "src\\pages\\Chat\\ChattingMain.jsx:61:8-to-src\\pages\\Login\\Login.jsx",
+      "source": "src\\pages\\Chat\\ChattingMain.jsx",
+      "target": "src\\pages\\Login\\Login.jsx",
+      "data": {
+        "viaRoute": "/login",
+        "trigger": {
+          "element": "navigate(\"/login\")",
+          "line": 61,
+          "endLine": 61,
+          "column": 8,
+          "endColumn": 26,
+          "sourceFile": "src\\pages\\Chat\\ChattingMain.jsx"
+        }
+      }
+    },
+    {
+      "id": "src\\pages\\Chat\\ChattingMain.jsx:149:56-to-src\\pages\\Search\\Search.jsx",
+      "source": "src\\pages\\Chat\\ChattingMain.jsx",
+      "target": "src\\pages\\Search\\Search.jsx",
+      "data": {
+        "viaRoute": "/search",
+        "trigger": {
+          "element": "navigate(\"/search\")",
+          "line": 149,
+          "endLine": 149,
+          "column": 56,
+          "endColumn": 75,
+          "sourceFile": "src\\pages\\Chat\\ChattingMain.jsx"
+        }
+      }
+    },
+    {
+      "id": "src\\pages\\Chat\\ChattingMain.jsx:155:53-to-src\\pages\\Map_main\\MapMain.jsx",
+      "source": "src\\pages\\Chat\\ChattingMain.jsx",
+      "target": "src\\pages\\Map_main\\MapMain.jsx",
+      "data": {
+        "viaRoute": "/map",
+        "trigger": {
+          "element": "navigate(\"/map\")",
+          "line": 155,
+          "endLine": 155,
+          "column": 53,
+          "endColumn": 69,
+          "sourceFile": "src\\pages\\Chat\\ChattingMain.jsx"
+        }
+      }
+    }
+  ]
+}

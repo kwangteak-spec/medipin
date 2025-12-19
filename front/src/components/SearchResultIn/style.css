@@ -1,0 +1,72 @@
+.search-result-in {
+  height: 169px;
+  position: relative;
+  width: 156px;
+}
+
+.search-result-in .search-result {
+  align-items: center;
+  background-color: #ffffff;
+  border-radius: 10px;
+  display: flex;
+  gap: 10px;
+  height: 100%;
+  justify-content: center;
+  padding: 10px;
+  width: 100%;
+}
+
+.search-result-in .frame {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  justify-content: center;
+  width: 146px;
+}
+
+.search-result-in .image-icon {
+  width: 103.16px;
+  height: 103.16px;
+  border-radius: 20px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f1f1f1;
+}
+
+.search-result-in .drug-db-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.search-result-in .image-placeholder {
+  width: 100%;
+  height: 100%;
+  font-size: 11px;
+  color: #999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-result-in .text-wrapper {
+  align-self: stretch;
+  color: #000000;
+  font-family: "Inter-Regular", Helvetica;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  line-height: 16px;
+  text-align: center;
+}
+
+.search-result-in .frame-2 {
+  position: absolute;
+  top: 12.43%;
+  right: 10%;
+  width: 15.38%;
+  cursor: pointer;
+}

@@ -1,0 +1,100 @@
+/* src/components/HomeBar/style.css */
+
+.homebar {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 393px;
+  height: 98px;
+  z-index: 100;
+}
+
+/* 배경 */
+.homebar-bg {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* 전체 아이콘 프레임 */
+.homebar-frame {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  display: flex;
+  justify-content: center;   /* 🔥 핵심 */
+  align-items: center;
+  gap: 38px;                 /* 좌/우 그룹 간격 */
+
+  width: 100%;
+}
+
+/* 좌 / 우 아이콘 그룹 */
+.icon-group {
+  display: flex;
+  gap: 20px;                 /* 아이콘 사이 간격 */
+}
+
+/* 개별 아이콘 */
+.icon-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  width: 48px;  
+}
+
+.icon-item img {
+  width: 24px;
+  height: 24px;
+}
+
+.icon-item span {
+  font-size: 8px;
+  color: #cfcfcf;
+  font-family: "Inter", sans-serif;
+}
+
+/* 중앙 AI 버튼 */
+.ai-center {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: #9f63ff;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+}
+
+.ai-center img {
+  width: 26px;
+  height: 26px;
+}
+
+/* =========================
+   Search active 상태 (검정)
+========================= */
+.icon-item.active img {
+  filter: brightness(0);
+}
+
+.icon-item.active span {
+  color: #000000;
+  font-weight: 600;
+}
+

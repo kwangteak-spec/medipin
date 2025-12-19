@@ -1,0 +1,111 @@
+/* 전체 */
+.login {
+  background-color: #f9f9fb;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* 로그인 영역 */
+.login .frame-2 {
+  margin-top: 120px;            /* 🔥 헤더와 간격 */
+  width: 293px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+/* Welcome + input 묶음 */
+.login .frame-3 {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.login .text-wrapper-2 {
+  color: #9f63ff;
+  font-family: "Noto Sans", Helvetica;
+  font-size: 25px;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+/* input 영역 */
+.login .frame-4 {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 100%;
+}
+
+.login .div-wrapper {
+  background-color: #eee6ff;
+  border-radius: 20px;
+  padding: 12px 16px;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+}
+
+/* input */
+.input-field {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  outline: none;
+  color: #000;
+}
+
+.input-field::placeholder {
+  color: #909090;
+}
+
+/* 에러 */
+.error {
+  color: red;
+  font-size: 12px;
+  text-align: center;
+}
+
+/* 버튼 */
+.login .button-instance {
+  width: 100% !important;
+  margin-top: 10px;
+}
+
+/* 하단 텍스트 */
+.login .frame-5 {
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+}
+
+/* Sign Up 한 줄 */
+.login .don-t-have-an {
+  display: flex;
+  gap: 4px;
+  white-space: nowrap;
+  color: #909090;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.login .span {
+  color: #909090;
+}
+
+.login .text-wrapper-4 {
+  font-weight: 800;
+}
+
+/* forget password */
+.login .text-wrapper-5 {
+  color: #909090;
+  font-size: 12px;
+  cursor: pointer;
+}
