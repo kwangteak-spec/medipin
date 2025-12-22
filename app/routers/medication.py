@@ -13,26 +13,37 @@ class ScheduleCreate(BaseModel):
     user_id: int
     pill_name: str
     dose: str
-    date: date_type
     start_date: Optional[date_type] = None
     end_date: Optional[date_type] = None
     timing: Optional[str] = None
     meal_relation: Optional[str] = None
     memo: Optional[str] = None
     notify: bool = True
+    is_taken: bool = False
+
+class ScheduleUpdate(BaseModel):
+    pill_name: Optional[str] = None
+    dose: Optional[str] = None
+    start_date: Optional[date_type] = None
+    end_date: Optional[date_type] = None
+    timing: Optional[str] = None
+    meal_relation: Optional[str] = None
+    memo: Optional[str] = None
+    notify: Optional[bool] = None
+    is_taken: Optional[bool] = None
 
 class ScheduleResponse(BaseModel):
     id: int
     user_id: int
     pill_name: Optional[str]
     dose: Optional[str]
-    date: Optional[date_type]
     start_date: Optional[date_type]
     end_date: Optional[date_type]
     timing: Optional[str]
     meal_relation: Optional[str]
     memo: Optional[str]
     notify: Optional[bool]
+    is_taken: Optional[bool]
     created_at: Optional[datetime]
 
     class Config:
@@ -44,7 +55,6 @@ def create_schedule(schedule: ScheduleCreate, db: Session = Depends(get_db)):
         user_id=schedule.user_id,
         pill_name=schedule.pill_name,
         dose=schedule.dose,
-        date=schedule.date,
         start_date=schedule.start_date,
         end_date=schedule.end_date,
         timing=schedule.timing,
@@ -79,7 +89,38 @@ def get_schedules(
         # The prompt image says `date` has a value.
         # Use simple date extraction filter compatible with common DBs
         from sqlalchemy import extract
-        query = query.filter(extract('year', MedicationSchedule.date) == year)
-        query = query.filter(extract('month', MedicationSchedule.date) == month)
+        try:
+            query = query.filter(extract('year', MedicationSchedule.start_date) == year)
+            query = query.filter(extract('month', MedicationSchedule.start_date) == month)
+        except Exception as e:
+            # Fallback or log error if extraction fails (though schema fix should prevent this)
+            print(f"Date filter error: {e}")
+            raise e
 
     return query.all()
+
+@router.patch("/schedule/{schedule_id}", response_model=ScheduleResponse)
+def update_schedule(schedule_id: int, update_data: ScheduleUpdate, db: Session = Depends(get_db)):
+    db_schedule = db.query(MedicationSchedule).filter(MedicationSchedule.id == schedule_id).first()
+    if not db_schedule:
+        raise HTTPException(status_code=404, detail="Schedule not found")
+    
+    # Exclude unset fields
+    update_dict = update_data.dict(exclude_unset=True)
+    
+    for key, value in update_dict.items():
+        setattr(db_schedule, key, value)
+    
+    db.commit()
+    db.refresh(db_schedule)
+    return db_schedule
+
+@router.delete("/schedule/{schedule_id}")
+def delete_schedule(schedule_id: int, db: Session = Depends(get_db)):
+    db_schedule = db.query(MedicationSchedule).filter(MedicationSchedule.id == schedule_id).first()
+    if not db_schedule:
+        raise HTTPException(status_code=404, detail="Schedule not found")
+    
+    db.delete(db_schedule)
+    db.commit()
+    return {"status": "success", "message": "Schedule deleted"}

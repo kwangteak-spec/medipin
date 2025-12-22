@@ -60,11 +60,21 @@ def get_hospitals(
         for r in rows
     ]
 
+transformer_reverse = Transformer.from_crs(
+    "EPSG:4326",
+    "EPSG:5181",
+    always_xy=True
+)
+
 @map_router.get("/convenience-stores")
-def get_convenience_stores(db: Session = Depends(get_db)):
-    # Convenience stores usually require transformation, so we verify size or just limit.
-    # For now, adding a limit to be safe.
-    rows = db.execute(text("""
+def get_convenience_stores(
+    db: Session = Depends(get_db),
+    north: float = Query(None),
+    south: float = Query(None),
+    east: float = Query(None),
+    west: float = Query(None)
+):
+    query_str = """
         SELECT
             name,
             address,
@@ -74,8 +84,28 @@ def get_convenience_stores(db: Session = Depends(get_db)):
         FROM safe_pharmacy
         WHERE x_coord IS NOT NULL
           AND y_coord IS NOT NULL
-        LIMIT 200
-    """)).fetchall()
+    """
+    params = {}
+
+    if north is not None and south is not None and east is not None and west is not None:
+        # Front (WGS84) -> DB (EPSG:5181)
+        # min_x, min_y = transformer_reverse.transform(west, south)
+        # max_x, max_y = transformer_reverse.transform(east, north)
+        # Note: 5181 y increases northwards, x increases eastwards usually.
+        # But to be safe, we take min/max of the transformed corner points.
+        
+        x1, y1 = transformer_reverse.transform(west, south)
+        x2, y2 = transformer_reverse.transform(east, north)
+        
+        min_x, max_x = sorted([x1, x2])
+        min_y, max_y = sorted([y1, y2])
+
+        query_str += " AND x_coord BETWEEN :min_x AND :max_x AND y_coord BETWEEN :min_y AND :max_y"
+        params = {"min_x": min_x, "max_x": max_x, "min_y": min_y, "max_y": max_y}
+    else:
+        query_str += " LIMIT 200"
+
+    rows = db.execute(text(query_str), params).fetchall()
 
     results = []
     for r in rows:

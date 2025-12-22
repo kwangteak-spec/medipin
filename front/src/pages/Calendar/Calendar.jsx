@@ -29,18 +29,26 @@ const Calendar = () => {
     const addDragStartY = useRef(0);
     const addDragStartHeight = useRef(0);
 
+    // 상세 시트 상태
+    const [detailSheetOpen, setDetailSheetOpen] = useState(false);
+    const [selectedEvent, setSelectedEvent] = useState(null);
+    const [detailSheetHeight, setDetailSheetHeight] = useState(0);
+
+    // 수정 모드 상태
+    const [editId, setEditId] = useState(null);
+
     // 폼 상태
     const [formData, setFormData] = useState({
         pill_name: "",
         dose: "",
-        date: "",
+        start_date: "",
         start_time: "",
         end_time: "",
         timing: "",
         memo: "",
     });
 
-    const API_URL = "http://127.0.0.1:8000/medication";
+    const API_URL = "http://localhost:8000/medication";
     const USER_ID = 1; // 임시 사용자 ID (로그인 연동 시 변경 필요)
 
     // --- 데이터 패칭 ---
@@ -77,7 +85,7 @@ const Calendar = () => {
         // 폼 초기화 (선택된 날짜로)
         setFormData(prev => ({
             ...prev,
-            date: format(day, 'yyyy-MM-dd')
+            start_date: format(day, 'yyyy-MM-dd')
         }));
     };
 
@@ -110,32 +118,121 @@ const Calendar = () => {
             user_id: USER_ID,
             pill_name: formData.pill_name,
             dose: formData.dose,
-            date: formData.date || format(selectedDate, 'yyyy-MM-dd'),
-            start_date: formData.date || format(selectedDate, 'yyyy-MM-dd'), // Start/End date to same day for single event
-            end_date: formData.date || format(selectedDate, 'yyyy-MM-dd'),
+            // date 필드 제거됨. start_date를 주 날짜로 사용
+            start_date: formData.start_date || format(selectedDate, 'yyyy-MM-dd'),
+            end_date: formData.start_date || format(selectedDate, 'yyyy-MM-dd'),
             timing: timingStr, // 시간 정보
             meal_relation: null,
             memo: formData.memo,
-            notify: true
+            notify: true,
+            is_taken: false, // 기본값
         };
 
         try {
-            const res = await fetch(`${API_URL}/schedule`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            });
+            let res;
+            if (editId) {
+                // 수정 (PATCH)
+                res = await fetch(`${API_URL}/schedule/${editId}`, {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+            } else {
+                // 생성 (POST)
+                res = await fetch(`${API_URL}/schedule`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+            }
+
             if (res.ok) {
-                alert("Event Created!");
+                alert(editId ? "Event Updated!" : "Event Created!");
                 closeAddSheet();
                 fetchSchedules(); // 리스트 갱신
             } else {
-                alert("Failed to create event");
+                const errorData = await res.json();
+                alert(`Failed to save event: ${errorData.detail || res.statusText}`);
             }
         } catch (err) {
             console.error(err);
-            alert("Error creating event");
+            alert(`Error saving event: ${err.message}`);
         }
+    };
+
+    // --- 상세 시트 핸들러 ---
+    const openDetailSheet = (event) => {
+        setSelectedEvent(event);
+        setDetailSheetOpen(true);
+        setDetailSheetHeight(40); // 40vh 정도
+    };
+
+    const closeDetailSheet = () => {
+        setDetailSheetOpen(false);
+        setDetailSheetHeight(0);
+        setTimeout(() => setSelectedEvent(null), 300);
+    };
+
+    // 복용 완료 토글
+    const handleToggleTaken = async () => {
+        if (!selectedEvent) return;
+        try {
+            const newStatus = !selectedEvent.is_taken;
+            const res = await fetch(`${API_URL}/schedule/${selectedEvent.id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ is_taken: newStatus })
+            });
+            if (res.ok) {
+                // 로컬 상태 업데이트 (리스트 즉시 반영을 위해)
+                const updated = await res.json();
+                setSelectedEvent(updated);
+                fetchSchedules();
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Failed to update status");
+        }
+    };
+
+    // 삭제
+    const handleDelete = async () => {
+        if (!selectedEvent) return;
+        if (!window.confirm("Are you sure you want to delete this?")) return;
+
+        try {
+            const res = await fetch(`${API_URL}/schedule/${selectedEvent.id}`, {
+                method: "DELETE"
+            });
+            if (res.ok) {
+                alert("Deleted!");
+                closeDetailSheet();
+                fetchSchedules();
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Failed to delete");
+        }
+    };
+
+    // 수정 버튼 클릭
+    const handleEditClick = () => {
+        if (!selectedEvent) return;
+        setEditId(selectedEvent.id);
+
+        // 폼 채우기
+        setFormData({
+            pill_name: selectedEvent.pill_name || "",
+            dose: selectedEvent.dose || "",
+            start_date: selectedEvent.start_date || "",
+            start_time: "", // 시간 파싱 복잡도 생략 (필요 시 timing 파싱)
+            end_time: "",
+            timing: selectedEvent.timing || "",
+            memo: selectedEvent.memo || "",
+        });
+
+        closeDetailSheet();
+        openAddSheet(); // 수정 모드(editId 존재)로 열림
     };
 
     // --- 달력 렌더링 ---
@@ -160,7 +257,7 @@ const Calendar = () => {
 
                 // 해당 날짜에 일정이 있는지 확인 (dot 표시용)
                 const dayStr = format(day, 'yyyy-MM-dd');
-                const hasEvents = schedules.some(s => s.date === dayStr);
+                const hasEvents = schedules.some(s => s.start_date === dayStr);
 
                 days.push(
                     <div
@@ -187,8 +284,8 @@ const Calendar = () => {
 
     // --- 선택된 날짜의 일정 필터링 ---
     const filteredSchedules = schedules.filter(s => {
-        if (!s.date) return false;
-        return s.date === format(selectedDate, 'yyyy-MM-dd');
+        if (!s.start_date) return false;
+        return s.start_date === format(selectedDate, 'yyyy-MM-dd');
     });
 
     // --- 드래그 핸들러 (List) ---
@@ -237,21 +334,26 @@ const Calendar = () => {
     const openAddSheet = () => {
         setIsAddMode(true);
         setAddSheetHeight(85);
-        // 초기 폼 데이터 세팅
-        setFormData({
-            pill_name: "",
-            dose: "",
-            date: format(selectedDate, 'yyyy-MM-dd'),
-            start_time: "",
-            end_time: "",
-            timing: "",
-            memo: "",
-        });
+        if (!editId) {
+            // 수정 모드가 아닐 때만 초기화 (handleEditClick에서 호출 시 editId가 이미 셋팅됨)
+            setFormData({
+                pill_name: "",
+                dose: "",
+                start_date: format(selectedDate, 'yyyy-MM-dd'),
+                start_time: "",
+                end_time: "",
+                timing: "",
+                memo: "",
+            });
+        }
     };
 
     const closeAddSheet = () => {
         setAddSheetHeight(0);
-        setTimeout(() => setIsAddMode(false), 300);
+        setTimeout(() => {
+            setIsAddMode(false);
+            setEditId(null); // 모드 초기화
+        }, 300);
     };
 
     return (
@@ -296,12 +398,18 @@ const Calendar = () => {
                         </div>
                     ) : (
                         filteredSchedules.map((item) => (
-                            <div className="event-card" key={item.id}>
+                            <div
+                                className={`event-card ${item.is_taken ? "taken" : ""}`}
+                                key={item.id}
+                                onClick={() => openDetailSheet(item)}
+                            >
                                 <div className="event-time">
-                                    <span className="dot" style={{ borderColor: '#9F63FF' }}></span>
+                                    <span className="dot" style={{ borderColor: item.is_taken ? '#aaa' : '#9F63FF', background: item.is_taken ? '#aaa' : 'transparent' }}></span>
                                     {item.timing || "Anytime"}
                                 </div>
-                                <div className="event-title">{item.pill_name}</div>
+                                <div className="event-title" style={{ textDecoration: item.is_taken ? "line-through" : "none", color: item.is_taken ? "#aaa" : "#333" }}>
+                                    {item.pill_name}
+                                </div>
                                 <div className="event-desc">{item.memo || item.dose}</div>
                             </div>
                         ))
@@ -329,7 +437,7 @@ const Calendar = () => {
                 </div>
 
                 <div className="sheet-header">
-                    <h3>Add New Pill</h3>
+                    <h3>{editId ? "Edit Pill" : "Add New Pill"}</h3>
                 </div>
 
                 <div className="sheet-content-scroll">
@@ -344,7 +452,7 @@ const Calendar = () => {
                     <div className="form-group">
                         <label>Date</label>
                         <div className="input-with-icon">
-                            <input name="date" value={formData.date} onChange={handleFormChange} placeholder="YYYY-MM-DD" />
+                            <input type="date" name="start_date" value={formData.start_date} onChange={handleFormChange} placeholder="YYYY-MM-DD" />
                         </div>
                     </div>
                     <div className="row-group">
@@ -374,16 +482,94 @@ const Calendar = () => {
                     </div>
 
                     <button className="create-btn" onClick={handleSubmit}>
-                        Create Event
+                        {editId ? "Update Event" : "Create Event"}
                     </button>
                     <div style={{ height: '100px' }}></div>
                 </div>
             </div>
 
+
+
+            {/* --- 상세 정보 시트 (Click to Action) --- */}
+            <div
+                className="detail-sheet"
+                style={{
+                    position: 'fixed',
+                    bottom: detailSheetOpen ? 0 : '-50vh',
+                    left: 0,
+                    width: '100%',
+                    height: 'auto',
+                    minHeight: '200px',
+                    background: 'white',
+                    borderRadius: '20px 20px 0 0',
+                    boxShadow: '0 -4px 10px rgba(0,0,0,0.1)',
+                    transition: 'bottom 0.3s ease',
+                    zIndex: 2000,
+                    padding: '24px'
+                }}
+            >
+                {selectedEvent && (
+                    <>
+                        <h3 style={{ margin: '0 0 16px', fontSize: '20px' }}>{selectedEvent.pill_name}</h3>
+                        <p style={{ color: '#666', marginBottom: '24px' }}>
+                            {selectedEvent.dose} / {selectedEvent.timing} <br />
+                            {selectedEvent.memo}
+                        </p>
+
+                        <div style={{ display: 'flex', gap: '12px' }}>
+                            <button
+                                onClick={handleToggleTaken}
+                                style={{
+                                    flex: 2,
+                                    padding: '12px',
+                                    borderRadius: '12px',
+                                    border: 'none',
+                                    background: selectedEvent.is_taken ? '#eee' : '#9F63FF',
+                                    color: selectedEvent.is_taken ? '#333' : 'white',
+                                    fontWeight: 'bold'
+                                }}
+                            >
+                                {selectedEvent.is_taken ? "Undo Taken" : "Mark as Taken"}
+                            </button>
+                            <button
+                                onClick={handleEditClick}
+                                style={{
+                                    flex: 1,
+                                    padding: '12px',
+                                    borderRadius: '12px',
+                                    border: '1px solid #ddd',
+                                    background: 'white',
+                                    fontWeight: 'bold'
+                                }}
+                            >
+                                Edit
+                            </button>
+                            <button
+                                onClick={handleDelete}
+                                style={{
+                                    flex: 0.8,
+                                    padding: '12px',
+                                    borderRadius: '12px',
+                                    border: 'none',
+                                    background: '#FFEBEE',
+                                    color: '#D32F2F',
+                                    fontWeight: 'bold'
+                                }}
+                            >
+                                Del
+                            </button>
+                        </div>
+                        <div style={{ marginTop: '20px', textAlign: 'center', color: '#999' }} onClick={closeDetailSheet}>
+                            Close
+                        </div>
+                    </>
+                )}
+            </div>
+
             <div className="bottom-nav-container">
                 <HomeBar />
             </div>
-        </div>
+        </div >
     );
 };
 

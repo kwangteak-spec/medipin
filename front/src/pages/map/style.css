@@ -41,7 +41,8 @@
 .map-main .map-instance,
 .map-main .under-bar {
   position: relative;
-  z-index: 3;           /* ⭐ UI가 항상 위 */
+  z-index: 3;
+  /* ⭐ UI가 항상 위 */
 }
 
 .map-main .input-bar-3 {
@@ -53,11 +54,14 @@
 /* map/style.css */
 .kakao-map-layer {
   position: absolute;
-  top: 120px;        /* 헤더 아래 */
+  top: 120px;
+  /* 헤더 아래 */
   left: 0;
   right: 0;
-  bottom: 80px;     /* 하단바 위 */
-  z-index: 1;           /* ⭐ UI Map보다 아래 */
+  bottom: 80px;
+  /* 하단바 위 */
+  z-index: 1;
+  /* ⭐ UI Map보다 아래 */
   pointer-events: auto;
 }
 
@@ -68,19 +72,21 @@
 
 .sidebar {
   position: absolute;
-  top: 120px;          /* 헤더 아래 */
+  top: 120px;
+  /* 헤더 아래 */
   left: 16px;
   width: 260px;
   background: white;
   padding: 14px;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   z-index: 10;
 }
 
 .map {
   width: 100%;
-  height: 100vh;   /* ⭐ 이 줄 없으면 지도 안 보임 */
+  height: 100vh;
+  /* ⭐ 이 줄 없으면 지도 안 보임 */
 }
 
 .category-filter {

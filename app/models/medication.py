@@ -26,13 +26,13 @@ class MedicationSchedule(Base):
     user_id = Column(Integer, nullable=False)
     pill_name = Column(String(255), nullable=True)
     dose = Column(String(50), nullable=True)
-    date = Column(Date, nullable=True)
     start_date = Column(Date, nullable=True)
     end_date = Column(Date, nullable=True)
     timing = Column(String(50), nullable=True)
     meal_relation = Column(String(100), nullable=True)
     memo = Column(Text, nullable=True)
     notify = Column(Boolean, server_default="1")
+    is_taken = Column(Boolean, default=False)
     created_at = Column(TIMESTAMP, server_default=func.now(), nullable=True)
 
     # I will not add a relationship to ActiveMedication if the schema doesn't match.

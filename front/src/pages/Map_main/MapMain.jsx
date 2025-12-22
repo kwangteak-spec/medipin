@@ -21,6 +21,7 @@ export const MapMain = () => {
     pharmacy: [],
     convenience: [],
   });
+  const myLocationOverlayRef = useRef(null); // 내 위치 오버레이
 
   // 데이터 상태
   const [searchText, setSearchText] = useState(""); // 검색창 입력값
@@ -135,7 +136,7 @@ export const MapMain = () => {
     const urls = [
       `${API_URL}/hospitals${params}`,
       `${API_URL}/pharmacies${params}`,
-      `${API_URL}/convenience-stores`,
+      `${API_URL}/convenience-stores${params}`,
     ];
 
     try {
@@ -239,6 +240,18 @@ export const MapMain = () => {
         if (mapInstance.current) {
           mapInstance.current.setCenter(loc);
           mapInstance.current.setLevel(4);
+
+          // 내 위치 마커 표시
+          if (myLocationOverlayRef.current) {
+            myLocationOverlayRef.current.setMap(null);
+          }
+          const content = `<div class="my-location-dot"></div>`;
+          myLocationOverlayRef.current = new window.kakao.maps.CustomOverlay({
+            position: loc,
+            content: content,
+            zIndex: 1
+          });
+          myLocationOverlayRef.current.setMap(mapInstance.current);
         }
       });
     }
