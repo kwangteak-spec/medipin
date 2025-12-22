@@ -205,7 +205,7 @@ const SearchResultInfo = () => {
           <InfoRow label="크기(단축)" value={getLengthValue(drugDetail.leng_short)} />
           <InfoRow label="업체명" value={drugDetail.company_name} />
           <InfoRow label="업체 일련번호" value={drugDetail.entp_seq || "19540006"} />
-          <InfoRow label="분류명" value={drugDetail.class_name} />
+          <InfoRow label="약의 용도" value={drugDetail.class_name} />
           <InfoRow label="분류 번호" value={drugDetail.class_no} />
         </div>
 

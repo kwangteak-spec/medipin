@@ -3,7 +3,8 @@ import { InputBar } from "../../components/InputBar/InputBar";
 import FilterIconGroup from "../../components/FilterIconGroup/FilterIconGroup";
 import MapList from "../../components/MapList/MapList";
 import { HomeBar } from "../../components/HomeBar/HomeBar";
-import { API_BASE_URL } from "../../api/config"; // HomeBar 추가
+import { API_BASE_URL } from "../../api/config";
+import Sidebar from "../map/Sidebar"; // Sidebar Import
 import ambulanceIcon from "../../assets/ambulance.svg";
 
 import "./style.css";
@@ -43,6 +44,14 @@ export const MapMain = () => {
     now: false,
     favorites: false,
   });
+
+  // Sidebar States
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [radius, setRadius] = useState(1000);
+  const [currentCity, setCurrentCity] = useState("");
+  const geocoderRef = useRef(null);
+  const radiusCircleRef = useRef(null); // 반경 원 Overlay
+
 
   const API_URL = `${API_BASE_URL}/map`;
 
@@ -104,6 +113,8 @@ export const MapMain = () => {
             disableClickZoom: true,
           });
 
+          geocoderRef.current = new kakao.maps.services.Geocoder(); // Geocoder Init
+
           // 디바운스 처리된 이벤트 핸들러
           const handleMapEvent = () => {
             if (timerRef.current) clearTimeout(timerRef.current);
@@ -123,6 +134,7 @@ export const MapMain = () => {
 
           fetchMarkersInBounds();
           moveToMyLocation();
+          updateRadiusCircle(); // 초기 반경 원 그리기
         });
       })
       .catch((err) => {
@@ -289,6 +301,56 @@ export const MapMain = () => {
     }
   };
 
+  /* 도시 변경 핸들러 */
+  const handleCityChange = (cityName) => {
+    setCurrentCity(cityName);
+    if (!cityName) {
+      moveToMyLocation(); // 도시 해제 시 내 위치로
+      return;
+    }
+
+    if (!geocoderRef.current || !mapInstance.current) return;
+
+    geocoderRef.current.addressSearch(cityName, (result, status) => {
+      if (status === window.kakao.maps.services.Status.OK) {
+        const coords = new window.kakao.maps.LatLng(result[0].y, result[0].x);
+        mapInstance.current.setCenter(coords);
+        mapInstance.current.setLevel(6); // 적당한 줌 레벨
+        fetchMarkersInBounds(); // 이동 후 데이터 로딩
+      }
+    });
+  };
+
+  /* 반경 원 그리기 */
+  const updateRadiusCircle = () => {
+    if (!mapInstance.current) return;
+
+    // 기존 원 제거
+    if (radiusCircleRef.current) {
+      radiusCircleRef.current.setMap(null);
+    }
+
+    // 현재 지도 중심 기준 원 그리기
+    const center = mapInstance.current.getCenter();
+
+    radiusCircleRef.current = new window.kakao.maps.Circle({
+      center: center,
+      radius: radius, // m 단위
+      strokeWeight: 1,
+      strokeColor: '#75B8FA',
+      strokeOpacity: 0.8,
+      strokeStyle: 'solid',
+      fillColor: '#CFE7FF',
+      fillOpacity: 0.3
+    });
+    radiusCircleRef.current.setMap(mapInstance.current);
+  };
+
+  // Radius 변경 시 원 업데이트
+  useEffect(() => {
+    updateRadiusCircle();
+  }, [radius]);
+
   return (
     <div className="map-main">
       {/* 상단 UI */}
@@ -306,6 +368,41 @@ export const MapMain = () => {
           />
         </div>
       </div>
+
+      {isSidebarOpen && (
+        <div style={{ position: 'absolute', top: 0, left: 0, zIndex: 30, height: '100%', background: 'white', width: '280px', boxShadow: '2px 0 5px rgba(0,0,0,0.1)' }}>
+          <Sidebar
+            radius={radius}
+            setRadius={setRadius}
+            searchQuery={searchText}
+            setSearchQuery={setSearchText}
+            currentCity={currentCity}
+            onCityChange={handleCityChange}
+            filterType={Object.keys(filters).find(k => filters[k]) || "all"}
+            setFilterType={(type) => {
+              if (type === 'all') setFilters({ hospital: true, pharmacy: true, sos: true, constore: true, now: false, favorites: false });
+              else setFilters({ hospital: false, pharmacy: false, sos: false, constore: false, now: false, favorites: false, [type]: true });
+            }}
+            results={visiblePlaces}
+            onSelectResult={(place) => {
+              setSelectedPlace(place);
+              setSheetState(SHEET.MIN);
+              if (mapInstance.current) {
+                const loc = new window.kakao.maps.LatLng(place.lat, place.lng);
+                mapInstance.current.setCenter(loc);
+              }
+            }}
+          />
+        </div>
+      )}
+
+      {/* 사이드바 토글 버튼 */}
+      <button
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        style={{ position: 'absolute', top: 110, left: 10, zIndex: 20, padding: '8px 12px', background: 'white', border: '1px solid #ddd', borderRadius: '4px', cursor: 'pointer', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}
+      >
+        {isSidebarOpen ? "◀" : "⚙️ 설정"}
+      </button>
 
       {/* 지도 */}
       <div ref={mapContainerRef} className="kakao-map-layer" />
