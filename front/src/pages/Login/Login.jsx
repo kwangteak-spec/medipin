@@ -28,7 +28,7 @@ export const Login = () => {
 
       if (res.ok) {
         localStorage.setItem("authToken", data.access_token);
-        navigate("/search_main");
+        setWarningType("welcome");
       } else {
         // 🔴 비밀번호 불일치
         setWarningType("incorrect-password");
@@ -39,13 +39,24 @@ export const Login = () => {
     }
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      handleLogin();
+    }
+  };
+
   return (
     <div className="login">
       {/* ✅ Warning (클릭 시 닫힘) */}
       {warningType !== "hidden" && (
         <Warning
           one={warningType}
-          onClose={() => setWarningType("hidden")}
+          onClose={() => {
+            if (warningType === "welcome") {
+              navigate("/search_main");
+            }
+            setWarningType("hidden");
+          }}
         />
       )}
 
@@ -61,9 +72,10 @@ export const Login = () => {
             <div className="div-wrapper">
               <input
                 className="input-field"
-                placeholder="ID"
+                placeholder="E-mail"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                onKeyDown={handleKeyDown}
               />
             </div>
 
@@ -74,6 +86,7 @@ export const Login = () => {
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={handleKeyDown}
               />
             </div>
           </div>
