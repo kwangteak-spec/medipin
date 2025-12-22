@@ -129,6 +129,51 @@ def generate_chatbot_response(db: Session, user_id: int, question: str) -> str:
         q = question.lower().strip()
         name = user_summary['name']
 
+        # === D. 약물 일반 정보 검색 (신규 추가) === 
+        # "타이레놀 정보" "이즈펜 효능" 등
+        # 순서상 상호작용보다 먼저 혹은 적절한 위치. 상호작용은 "같이 먹어도" 키워드가 강함.
+        drug_keywords = ["정보", "효능", "효과", "부작용", "주의사항", "어떤 약"]
+        if "약" not in q and any(k in q for k in drug_keywords):
+             pass # "약" 이라는 단어가 없어도 검색하고 싶다면 pass. 
+             # 하지만 단순 "정보 알려줘"는 너무 광범위. 
+             # 여기서는 (약 이름 추정) + (키워드) 조합이 필요함.
+             # 간단히: "정보" 키워드가 있고, 약 이름이 감지되면? 
+             # 혹은 단순히 텍스트에서 약 이름을 찾아내는 것이 핵심.
+        
+        # 간단한 로직: 질문에서 2글자 이상 명사를 추출해서 DB에서 검색
+        # 여기서는 "정보" or "효능" 키워드가 있으면 수행.
+        if any(k in q for k in drug_keywords):
+            # 검색어 추출 (질문 전체를 검색어로 쓰되, 조사나 공통어구 제거 필요)
+            # 일단 LIKE 검색이므로 대략적인 키워드로 검색 시도
+            # ex: "타이레놀 정보 알려줘" -> "타이레놀"
+            
+            search_term = q
+            for k in drug_keywords + ["알려줘", "뭐야", "검색", "해줘", "보여줘", "정보", "약"]:
+                 search_term = search_term.replace(k, "")
+            search_term = search_term.strip()
+            
+            if len(search_term) >= 2:
+                from app.models.drug_info import ProductLicense
+                # ProductLicense 테이블 (item_name) 검색
+                found_drug = db.query(ProductLicense).filter(
+                    ProductLicense.item_name.like(f"%{search_term}%")
+                ).first()
+                
+                if found_drug:
+                    # 정보 구성
+                    info_msg = f"'{found_drug.item_name}'에 대한 정보입니다.\n"
+                    if found_drug.entp_name:
+                         info_msg += f"- 제조사: {found_drug.entp_name}\n"
+                    if found_drug.ingr_name:
+                         info_msg += f"- 성분: {found_drug.ingr_name}\n"
+                    if found_drug.induty:
+                         info_msg += f"- 분류: {found_drug.induty}\n"
+                    
+                    return info_msg
+                else:
+                     # 검색 실패 시 아래 로직으로 넘어감 (or 없다고 리턴)
+                     pass
+
         # === F. 복약 일정 등록 의도 (개선됨) ===
         if any(k in q for k in ["등록", "추가"]) and any(k in q for k in ["약", "먹을", "스케줄"]):
             parsed = parse_registration_command(q)
