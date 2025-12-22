@@ -36,6 +36,46 @@ def get_my_family_list(
     family_members = db.query(UserProfile).filter(UserProfile.user_id == current_user_id, UserProfile.id != current_user_id).all()
     return family_members # 임시로 쿼리 직접 사용
 
+from app.schemas.user import FamilyMemberRequest
+import uuid
+
+@user_router.post("/family", response_model=UserProfileResponse)
+def create_family_member(
+    request: FamilyMemberRequest,
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user)
+):
+    """ 가족 구성원을 추가합니다. """
+    try:
+        # 이메일은 Unique 제약조건이 있으므로 더미 이메일 생성
+        dummy_email = f"family_{uuid.uuid4()}@dummymedipin.com"
+        
+        new_member = UserProfile(
+            user_id=current_user_id, # 주사용자와 연결
+            name=request.name,
+            email=dummy_email,
+            hashed_password="family_member_pwd", # 더미 비번
+            age=request.age,
+            birth_date=request.birth_date,
+            gender=request.gender,
+            height=request.height,
+            weight=request.weight,
+            special_note=request.special_note
+        )
+        db.add(new_member)
+        db.commit()
+        db.refresh(new_member)
+        return new_member
+    except Exception as e:
+        import traceback
+        with open("debug_error.log", "w", encoding="utf-8") as f:
+            f.write(str(e))
+            f.write(traceback.format_exc())
+            
+        print(f"Error creating family member: {e}")
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to create family member: {str(e)}")
+
 # =======================================================
 # 🚨 3. 프로필 상세 정보 수정 (이름, 이메일, 비밀번호 등)
 # =======================================================

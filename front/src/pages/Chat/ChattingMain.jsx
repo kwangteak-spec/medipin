@@ -28,7 +28,7 @@ const ChattingMain = () => {
   }, [messages]);
 
   const handleSendMessage = async () => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("authToken");
 
     if (!token) {
       alert("세션이 만료되었거나 로그인이 필요합니다.");
@@ -50,20 +50,21 @@ const ChattingMain = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}` 
+          "Authorization": `Bearer ${token}`
         },
-        body: JSON.stringify({ question: currentQuestion }), 
+        body: JSON.stringify({ question: currentQuestion }),
       });
 
       if (response.status === 401) {
         alert("인증에 실패했습니다. 다시 로그인해주세요.");
-        localStorage.removeItem("token");
+        localStorage.removeItem("authToken");
         navigate("/login");
         return;
       }
 
       const data = await response.json();
-      
+      console.log("Chatbot Response:", data); // ✅ 응답 구조 확인용 로그
+
       if (data && data.response) {
         const botMessage = { text: data.response, sender: "bot" };
         setMessages((prev) => [...prev, botMessage]);
@@ -85,17 +86,17 @@ const ChattingMain = () => {
 
       {/* 대화창 영역 */}
       <div className="chat-container" ref={scrollRef} style={{
-          position: "absolute", top: "150px", width: "100%", height: "400px", 
-          overflowY: "auto", padding: "0 20px", zIndex: 10,
+        position: "absolute", top: "150px", width: "100%", height: "400px",
+        overflowY: "auto", padding: "0 20px", zIndex: 10,
       }}>
         {messages.map((msg, index) => (
           <div key={index} className={`message-bubble ${msg.sender}`} style={{
-              textAlign: msg.sender === "user" ? "right" : "left", margin: "10px 0",
+            textAlign: msg.sender === "user" ? "right" : "left", margin: "10px 0",
           }}>
             <span style={{
-                background: msg.sender === "user" ? "#9f63ff" : "#eee6ff",
-                color: msg.sender === "user" ? "white" : "black",
-                padding: "10px 15px", borderRadius: "15px", display: "inline-block", maxWidth: "80%", fontSize: "14px",
+              background: msg.sender === "user" ? "#9f63ff" : "#eee6ff",
+              color: msg.sender === "user" ? "white" : "black",
+              padding: "10px 15px", borderRadius: "15px", display: "inline-block", maxWidth: "80%", fontSize: "14px",
             }}>
               {msg.text}
             </span>
@@ -131,7 +132,7 @@ const ChattingMain = () => {
       {/* 입력 영역 */}
       <div className="ai-icon-input-with">
         <div className="content">
-          <input type="text" className="supporting-text" placeholder="메시지를 입력하세요..." 
+          <input type="text" className="supporting-text" placeholder="메시지를 입력하세요..."
             value={inputValue} onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
             style={{ border: "none", background: "transparent", width: "100%", outline: "none" }}

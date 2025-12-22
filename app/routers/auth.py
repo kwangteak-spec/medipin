@@ -64,3 +64,11 @@ def login(login_request: UserLoginRequest, db: Session = Depends(get_db)):
         "token_type": "bearer",
         "user_name": user.name
     }
+    
+@auth_router.get("/me")
+def me(current_user: UserProfile = Depends(get_current_user)):
+    return {
+        "id": current_user.id,
+        "email": current_user.email,
+        "name": current_user.name,
+    }

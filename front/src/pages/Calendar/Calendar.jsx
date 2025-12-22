@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom"; // ✅ useLocation 추가
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth, isSameDay, parseISO } from "date-fns";
 import { HomeBar } from "../../components/HomeBar/HomeBar";
 /* 아이콘들 */
@@ -55,6 +56,22 @@ const Calendar = () => {
     useEffect(() => {
         fetchSchedules();
     }, [currentMonth]);
+
+    const location = useLocation(); // ✅ Hook 사용
+
+    // 검색 페이지에서 넘어왔을 때 자동 실행
+    useEffect(() => {
+        if (location.state?.addPillName) {
+            setFormData(prev => ({
+                ...prev,
+                pill_name: location.state.addPillName
+            }));
+            // 시트 열기
+            setTimeout(() => openAddSheet(), 100);
+
+            // 상태 초기화 (새로고침 시 방지) - history replace로 state 제거 가능하지만 생략
+        }
+    }, [location.state]);
 
     const fetchSchedules = async () => {
         setLoading(true);
