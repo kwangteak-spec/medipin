@@ -67,6 +67,13 @@
       ]
     },
     {
+      "id": "src/pages/EditFamily/EditFamily.jsx",
+      "label": "EditFamily",
+      "routes": [
+        "/edit-family"
+      ]
+    },
+    {
       "id": "src/pages/Calendar/Calendar.jsx",
       "label": "Calendar",
       "routes": [
@@ -105,15 +112,15 @@
   ],
   "edges": [
     {
-      "id": "src\\pages\\Login\\Login.jsx:44:6-to-src\\pages\\Search_main\\SearchMain.jsx",
+      "id": "src\\pages\\Login\\Login.jsx:45:6-to-src\\pages\\Search_main\\SearchMain.jsx",
       "source": "src\\pages\\Login\\Login.jsx",
       "target": "src\\pages\\Search_main\\SearchMain.jsx",
       "data": {
         "viaRoute": "/search_main",
         "trigger": {
           "element": "navigate(\"/search_main\")",
-          "line": 44,
-          "endLine": 44,
+          "line": 45,
+          "endLine": 45,
           "column": 6,
           "endColumn": 30,
           "sourceFile": "src\\pages\\Login\\Login.jsx"
@@ -121,15 +128,15 @@
       }
     },
     {
-      "id": "src\\pages\\Login\\Login.jsx:89:54-to-src\\pages\\Register\\Register.jsx",
+      "id": "src\\pages\\Login\\Login.jsx:90:54-to-src\\pages\\Register\\Register.jsx",
       "source": "src\\pages\\Login\\Login.jsx",
       "target": "src\\pages\\Register\\Register.jsx",
       "data": {
         "viaRoute": "/register",
         "trigger": {
           "element": "navigate(\"/register\")",
-          "line": 89,
-          "endLine": 89,
+          "line": 90,
+          "endLine": 90,
           "column": 54,
           "endColumn": 75,
           "sourceFile": "src\\pages\\Login\\Login.jsx"
@@ -149,22 +156,6 @@
           "column": 6,
           "endColumn": 24,
           "sourceFile": "src\\pages\\Register\\Register.jsx"
-        }
-      }
-    },
-    {
-      "id": "src\\pages\\Search_detail\\SearchDetail.jsx:93:39-to-src\\pages\\Calendar\\Calendar.jsx",
-      "source": "src\\pages\\Search_detail\\SearchDetail.jsx",
-      "target": "src\\pages\\Calendar\\Calendar.jsx",
-      "data": {
-        "viaRoute": "/calendar",
-        "trigger": {
-          "element": "navigate(\"/calendar\", { state: { addPillName: item.drug_name } })",
-          "line": 93,
-          "endLine": 93,
-          "column": 39,
-          "endColumn": 104,
-          "sourceFile": "src\\pages\\Search_detail\\SearchDetail.jsx"
         }
       }
     },
