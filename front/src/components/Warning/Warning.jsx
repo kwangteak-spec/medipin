@@ -22,6 +22,7 @@ export const Warning = ({ one, onClose }) => {
               )}
               {one === "unrequire-email" && <>Invalid email format!</>}
               {one === "register-complete" && <>Registration complete!</>}
+              {one === "welcome" && <>Welcome to our MediPin!</>}
             </div>
 
             <img className="line" alt="line" src={warningLine} />
@@ -60,6 +61,12 @@ export const Warning = ({ one, onClose }) => {
               </>
             )}
 
+            {one === "welcome" && (
+              <>
+                Enjoy service :-)
+              </>
+            )}
+
             {one === "register-complete" && (
               <>
                 Enjoy our service
@@ -82,6 +89,7 @@ Warning.propTypes = {
     "incorrect-password-confirm",
     "unrequire-email",
     "register-complete",
+    "welcome",
     "hidden",
   ]),
   onClose: PropTypes.func.isRequired,

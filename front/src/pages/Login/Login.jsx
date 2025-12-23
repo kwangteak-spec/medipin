@@ -29,30 +29,38 @@ export const Login = () => {
       // FastAPI가 JSON으로 응답하므로 그대로 파싱
       const data = await res.json();
 
-      // 서버 도달은 했지만 인증 실패(401 등)
-      if (!res.ok) {
+      if (res.ok) {
+        localStorage.setItem("authToken", data.access_token);
+        setWarningType("welcome");
+      } else {
+        // 🔴 비밀번호 불일치
         setWarningType("incorrect-password");
         return;
       }
+    } catch {
+      // 🔴 서버 오류도 로그인 실패로 처리
+      setWarningType("incorrect-password");
+    }
+  };
 
-      // 로그인 성공: access + refresh 저장
-      setTokens({
-        accessToken: data.access_token,
-        refreshToken: data.refresh_token,
-      });
-
-      navigate("/search_main");
-    } catch (err) {
-      // 서버 자체에 연결 불가(다운/주소 오류/네트워크 등)
-      console.error(err);
-      setWarningType("network-error"); // Warning 컴포넌트에 타입 추가 권장
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      handleLogin();
     }
   };
 
   return (
     <div className="login">
       {warningType !== "hidden" && (
-        <Warning one={warningType} onClose={() => setWarningType("hidden")} />
+        <Warning
+          one={warningType}
+          onClose={() => {
+            if (warningType === "welcome") {
+              navigate("/search_main");
+            }
+            setWarningType("hidden");
+          }}
+        />
       )}
 
       <Element variant="simple" />
@@ -65,9 +73,10 @@ export const Login = () => {
             <div className="div-wrapper">
               <input
                 className="input-field"
-                placeholder="ID"
+                placeholder="E-mail"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                onKeyDown={handleKeyDown}
               />
             </div>
 
@@ -78,6 +87,7 @@ export const Login = () => {
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={handleKeyDown}
               />
             </div>
           </div>
