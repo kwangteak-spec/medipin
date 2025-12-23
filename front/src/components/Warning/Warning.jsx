@@ -22,6 +22,7 @@ export const Warning = ({ one, onClose }) => {
               )}
               {one === "unrequire-email" && <>Invalid email format!</>}
               {one === "register-complete" && <>Registration complete!</>}
+              {one === "medication-complete" && <>Registration complete!</>}
               {one === "welcome" && <>Welcome to our MediPin!</>}
             </div>
 
@@ -72,6 +73,12 @@ export const Warning = ({ one, onClose }) => {
                 Enjoy our service
                 <br />
                 and have a great time using it!
+              </>
+            )}
+
+            {one === "medication-complete" && (
+              <>
+                Medication schedule saved successfully.
               </>
             )}
           </div>

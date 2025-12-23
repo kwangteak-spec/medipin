@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { API_BASE_URL } from "../../api/config";
+import { Warning } from "../Warning/Warning";
+import { Button } from "../Button/Button";
 import "./style.css";
 
 const AddScheduleModal = ({ isOpen, onClose, defaultPillName }) => {
@@ -8,23 +10,34 @@ const AddScheduleModal = ({ isOpen, onClose, defaultPillName }) => {
         pill_name: "",
         dose: "",
         start_date: format(new Date(), 'yyyy-MM-dd'),
-        start_time: "",
-        end_time: "",
+        end_date: format(new Date(), 'yyyy-MM-dd'),
         timing: "",
         memo: "",
     });
 
     const [loading, setLoading] = useState(false);
+    const [warningType, setWarningType] = useState(null); // Warning state
 
     useEffect(() => {
-        if (isOpen && defaultPillName) {
-            setFormData(prev => ({ ...prev, pill_name: defaultPillName }));
+        console.log("AddScheduleModal useEffect - isOpen:", isOpen, "defaultPillName:", defaultPillName);
+        if (isOpen) {
+            setFormData(prev => ({
+                ...prev,
+                pill_name: defaultPillName || ""
+            }));
         }
     }, [isOpen, defaultPillName]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleWarningClose = () => {
+        setWarningType(null);
+        if (warningType === "medication-complete") {
+            onClose(); // Close modal on success warning close
+        }
     };
 
     const handleSubmit = async () => {
@@ -37,20 +50,13 @@ const AddScheduleModal = ({ isOpen, onClose, defaultPillName }) => {
         const storedUserId = localStorage.getItem("userId");
         const USER_ID = storedUserId ? parseInt(storedUserId) : 1;
 
-        let timingStr = formData.timing;
-        if (formData.start_time && formData.end_time) {
-            timingStr = `${formData.start_time}-${formData.end_time}`;
-        } else if (formData.start_time) {
-            timingStr = formData.start_time;
-        }
-
         const payload = {
             user_id: USER_ID,
             pill_name: formData.pill_name,
             dose: formData.dose,
             start_date: formData.start_date,
-            end_date: formData.start_date, // 하루 기준
-            timing: timingStr,
+            end_date: formData.end_date,
+            timing: formData.timing,
             meal_relation: null,
             memo: formData.memo,
             notify: true,
@@ -65,8 +71,8 @@ const AddScheduleModal = ({ isOpen, onClose, defaultPillName }) => {
             });
 
             if (res.ok) {
-                alert("복약 일정이 등록되었습니다!");
-                onClose();
+                // Show custom warning instead of alert
+                setWarningType("medication-complete");
             } else {
                 const err = await res.json();
                 alert(`등록 실패: ${err.detail || "오류가 발생했습니다."}`);
@@ -82,50 +88,50 @@ const AddScheduleModal = ({ isOpen, onClose, defaultPillName }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="add-schedule-modal-overlay">
-            <div className="add-schedule-modal">
-                <div className="modal-header">
-                    <h3>복약 일정 등록</h3>
-                    <button className="close-btn" onClick={onClose}>×</button>
-                </div>
-                <div className="modal-content">
-                    <div className="form-group">
-                        <label>약 이름</label>
-                        <input name="pill_name" value={formData.pill_name} onChange={handleChange} placeholder="약 이름" />
-                    </div>
-                    <div className="form-group">
-                        <label>용량 (1정 등)</label>
-                        <input name="dose" value={formData.dose} onChange={handleChange} placeholder="예: 1정" />
-                    </div>
-                    <div className="form-group">
-                        <label>날짜</label>
-                        <input type="date" name="start_date" value={formData.start_date} onChange={handleChange} />
-                    </div>
-                    <div className="row-group">
-                        <div className="form-group half">
-                            <label>시작 시간</label>
-                            <input type="time" name="start_time" value={formData.start_time} onChange={handleChange} />
-                        </div>
-                        <div className="form-group half">
-                            <label>종료 시간</label>
-                            <input type="time" name="end_time" value={formData.end_time} onChange={handleChange} />
-                        </div>
-                    </div>
-                    <div className="form-group">
-                        <label>복용 타이밍 (식후 30분 등)</label>
-                        <input name="timing" value={formData.timing} onChange={handleChange} placeholder="예: 식후 30분" />
-                    </div>
-                    <div className="form-group">
-                        <label>메모</label>
-                        <textarea name="memo" value={formData.memo} onChange={handleChange} rows={3} placeholder="메모 입력"></textarea>
-                    </div>
+        <>
+            {warningType && <Warning one={warningType} onClose={handleWarningClose} />}
 
-                    <button className="submit-btn" onClick={handleSubmit} disabled={loading}>
-                        {loading ? "등록 중..." : "등록하기"}
-                    </button>
+            <div className="add-schedule-modal-overlay">
+                <div className="add-schedule-modal">
+                    <div className="modal-header">
+                        <h3>Add Medication Schedule</h3>
+                        <button className="close-btn" onClick={onClose}>×</button>
+                    </div>
+                    <div className="modal-content">
+                        <div className="form-group">
+                            <label>pill name</label>
+                            <input name="pill_name" value={formData.pill_name} onChange={handleChange} placeholder="약 이름" />
+                        </div>
+                        <div className="form-group">
+                            <label>Dose (1정 등)</label>
+                            <input name="dose" value={formData.dose} onChange={handleChange} placeholder="예: 1정" />
+                        </div>
+
+                        <div className="row-group">
+                            <div className="form-group half">
+                                <label>start date</label>
+                                <input type="date" name="start_date" value={formData.start_date} onChange={handleChange} />
+                            </div>
+                            <div className="form-group half">
+                                <label>end date</label>
+                                <input type="date" name="end_date" value={formData.end_date} onChange={handleChange} />
+                            </div>
+                        </div>
+
+                        <div className="form-group">
+                            <label>timing (식후 30분 등)</label>
+                            <input name="timing" value={formData.timing} onChange={handleChange} placeholder="예: 식후 30분" />
+                        </div>
+                        <div className="form-group">
+                            <label>memo</label>
+                            <textarea name="memo" value={formData.memo} onChange={handleChange} rows={3} placeholder="메모 입력"></textarea>
+                        </div>
+
+                        <Button one="register" onClick={handleSubmit} disabled={loading} />
+                    </div>
                 </div>
             </div>
-        </div>
+        </>
     );
 };
 

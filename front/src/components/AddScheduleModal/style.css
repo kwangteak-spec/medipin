@@ -61,6 +61,16 @@
     border-radius: 8px;
     font-size: 14px;
     box-sizing: border-box;
+    transition: border-color 0.2s;
+    /* Smooth transition */
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border: 1px solid #9F63FF;
+    box-shadow: 0 0 0 1px #9F63FF;
+    /* Make it look a bit thicker/clearer */
 }
 
 .row-group {

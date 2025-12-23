@@ -219,7 +219,7 @@ const SearchResultInfo = () => {
       <AddScheduleModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        defaultPillName={drugDetail ? drugDetail.item_name : ""}
+        defaultPillName={drugDetail ? (drugDetail.drug_name || drugDetail.item_name) : ""}
       />
 
       {/* 3. 하단 네비게이션 */}

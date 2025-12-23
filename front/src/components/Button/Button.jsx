@@ -2,12 +2,13 @@ import PropTypes from "prop-types";
 import React from "react";
 import "./style.css";
 
-export const Button = ({ one = "login", className = "", onClick }) => {
+export const Button = ({ one = "login", className = "", onClick, disabled }) => {
   return (
     <button
       type="button"
       className={`button button--${one} ${className}`}
       onClick={onClick}
+      disabled={disabled}
     >
       {one === "login" && "login"}
       {one === "register" && "Register"}
