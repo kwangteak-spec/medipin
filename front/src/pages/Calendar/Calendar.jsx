@@ -465,8 +465,23 @@ const Calendar = () => {
             <div
                 className="calendar-view"
                 onClick={() => {
-                    // 배경 클릭 시 요청하신 대로 정확히 1/4 (25%) 높이로 최소화
-                    if (sheetHeight > 25) setSheetHeight(25);
+                    // 현재 선택된 날짜의 약 개수 확인
+                    const dayStr = format(selectedDate, 'yyyy-MM-dd');
+                    const countOnDay = schedules.filter(s => s.start_date <= dayStr && s.end_date >= dayStr).length;
+
+                    // 2개 이하: 바로 닫기 (sheetHeight = 0)
+                    // 3개 이상: 첫 클릭 시 25vh로 축소, 두 번째 클릭 시 닫기
+                    if (countOnDay <= 2) {
+                        // 2개 이하일 때는 1/4 단계 생략하고 바로 닫기
+                        if (sheetHeight > 0) setSheetHeight(0);
+                    } else {
+                        // 3개 이상일 때는 두 단계로 닫기
+                        if (sheetHeight > 25) {
+                            setSheetHeight(25); // 첫 클릭: 1/4로 축소
+                        } else if (sheetHeight > 0 && sheetHeight <= 25) {
+                            setSheetHeight(0); // 두 번째 클릭: 완전히 닫기
+                        }
+                    }
                 }}
             >
                 <div className="calendar-header">
