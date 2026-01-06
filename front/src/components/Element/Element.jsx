@@ -1,6 +1,6 @@
 import React from "react";
 import { useAlarm } from "../../context/AlarmContext";
-// import { InputBar } from "../InputBar";
+import { InputBar } from "../InputBar/InputBar";
 import "./style.css";
 
 /**

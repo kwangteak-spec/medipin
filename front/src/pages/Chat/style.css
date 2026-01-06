@@ -18,17 +18,25 @@
   /* Below Element */
   width: 361px;
   /* Align with search-ui */
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   height: calc(100vh - 190px);
   /* Adjust for header and navbar */
+  z-index: 10;
 }
 
-/* History Mode Overrides */
+/* History Mode Overrides (List and Detail) */
 .chat-ui.history-mode {
-  top: 200px;
-  /* Below the taller chat-list header */
-  height: calc(100vh - 280px);
+  top: 190px;
+  /* Adjust for the taller header (180px) */
+  height: calc(100vh - 270px);
+}
+
+/* Specific adjustment when tabs are hidden in detail view */
+.chat-ui.history-detail-mode {
+  padding-top: 20px;
 }
 
 
@@ -49,6 +57,8 @@
   padding: 5px 0;
   width: fit-content;
   margin-bottom: 20px;
+  position: relative;
+  z-index: 100;
 }
 
 .tab {
@@ -280,6 +290,8 @@
 
 .history-item {
   display: flex;
+  align-items: center;
+  /* Align avatar and content horizontally */
   padding: 15px 0;
   border-bottom: 1.5px solid #eee6ff;
   cursor: pointer;
@@ -315,6 +327,36 @@
   font-size: 16px;
   font-weight: 700;
   color: #333;
+}
+
+.info-top {
+  display: flex;
+  justify-content: flex-end;
+  /* Align meta info to right */
+  align-items: center;
+}
+
+.item-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.delete-button {
+  border: none;
+  background: transparent;
+  color: #ffb7b7;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px;
+  margin-right: -4px;
+  transition: color 0.2s;
+  line-height: 1;
+}
+
+.delete-button:hover {
+  color: #ff6b6b;
 }
 
 .item-time {

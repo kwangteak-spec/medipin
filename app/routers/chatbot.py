@@ -88,3 +88,34 @@ def mark_as_read(
     
     db.commit()
     return {"status": "success"}
+
+@chatbot_router.delete("/history/{history_id}")
+def delete_chatbot_history(
+    history_id: int,
+    db: Session = Depends(get_db),
+    current_user: UserProfile = Depends(get_current_user)
+):
+    """
+    특정 채팅 히스토리 항목을 삭제합니다.
+    """
+    if not current_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="로그인이 필요합니다."
+        )
+
+    history_item = db.query(ChatHistory).filter(
+        ChatHistory.id == history_id, 
+        ChatHistory.user_id == current_user.id
+    ).first()
+    
+    if not history_item:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="삭제할 항목을 찾을 수 없거나 권한이 없습니다."
+        )
+
+    db.delete(history_item)
+    db.commit()
+    
+    return {"status": "success"}

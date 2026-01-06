@@ -305,7 +305,11 @@ def generate_chatbot_response(db: Session, user_id: int, question: str) -> str:
             text_response = response.text.strip()
         except ValueError:
             print(f"[WARN] Response blocked: {response.prompt_feedback}")
-            return "죄송합니다. 안전 정책에 의해 답변이 차단되었습니다."
+            text_response = "죄송합니다. 안전 정책에 의해 답변이 차단되었습니다."
+            bot_msg = ChatHistory(user_id=user_id, message=text_response, sender="bot")
+            db.add(bot_msg)
+            db.commit()
+            return text_response
 
         # JSON 응답 감지 및 처리
         if "REGISTER_SCHEDULE" in text_response:
@@ -336,9 +340,18 @@ def generate_chatbot_response(db: Session, user_id: int, question: str) -> str:
         print(f"!!! Gemini API Error !!!: {error_msg}")
         traceback.print_exc()
         
+        final_error = f"문제 발생: {error_msg[:50]}..."
         if "404" in error_msg:
-             return f"모델을 찾을 수 없습니다. (Selected: {SELECTED_MODEL_NAME})"
-        if "429" in error_msg:
-            return "사용량이 많아 잠시 후 다시 시도해 주세요. (429 Too Many Requests)"
+             final_error = f"모델을 찾을 수 없습니다. (Selected: {SELECTED_MODEL_NAME})"
+        elif "429" in error_msg:
+            final_error = "사용량이 많아 잠시 후 다시 시도해 주세요. (429 Too Many Requests)"
             
-        return f"문제 발생: {error_msg[:50]}..."
+        # Save Error message as Bot response so it shows in history
+        try:
+            bot_msg = ChatHistory(user_id=user_id, message=final_error, sender="bot")
+            db.add(bot_msg)
+            db.commit()
+        except:
+            pass
+            
+        return final_error

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { API_BASE_URL } from "../../api/config";
 
 import { AiIcon } from "../../components/AiIcon";
@@ -13,11 +13,16 @@ import "./style.css";
 
 const ChattingMain = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState("Chat");
+
+  const location = useLocation();
+  const activeTab = location.pathname.startsWith("/chat/history") ? "History" :
+    location.pathname.startsWith("/chat/setting") ? "Setting" : "Chat";
+
   const scrollRef = useRef();
 
   const markMessagesAsRead = async () => {
@@ -33,11 +38,38 @@ const ChattingMain = () => {
     }
   };
 
+  const fetchMessages = async () => {
+    const token = localStorage.getItem("authToken");
+    if (!token) return;
+    try {
+      const response = await fetch(`${API_BASE_URL}/chatbot/history`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        // data is desc by created_at, so reverse to show oldest first in chat flow
+        const formatted = data.reverse().map(m => ({
+          text: m.message,
+          sender: m.sender
+        }));
+        setMessages(formatted);
+      }
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+    }
+  };
+
   useEffect(() => {
     if (activeTab === "Chat") {
+      const isHistoryRequest = searchParams.get("history") === "true";
+      if (isHistoryRequest) {
+        fetchMessages();
+      } else {
+        setMessages([]); // Clear for fresh look
+      }
       markMessagesAsRead();
     }
-  }, [activeTab]);
+  }, [activeTab, searchParams]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -100,34 +132,36 @@ const ChattingMain = () => {
 
   return (
     <div className="chatting-main">
-      <Element variant={activeTab === "History" ? "chat-list" : "alarm"} />
+      <Element variant={(activeTab === "History" || searchParams.get("history") === "true") ? "chat-list" : "alarm"} />
 
-      <div className={`chat-ui ${activeTab === "History" ? "history-mode" : ""}`}>
-        {activeTab === "Chat" && <h1 className="page-title">Chat AI</h1>}
+      <div className={`chat-ui ${activeTab === "History" || searchParams.get("history") === "true" ? "history-mode" : ""} ${searchParams.get("history") === "true" ? "history-detail-mode" : ""}`}>
+        {activeTab === "Chat" && searchParams.get("history") !== "true" && <h1 className="page-title">Chat AI</h1>}
 
-        <div className="tabs">
-          <div
-            className={`tab ${activeTab === "Chat" ? "active" : ""}`}
-            onClick={() => setActiveTab("Chat")}
-          >
-            <ChatbubbleEllipsesOutline className="tab-icon" />
-            <span>Chat</span>
+        {searchParams.get("history") !== "true" && (
+          <div className="tabs">
+            <div
+              className={`tab ${activeTab === "Chat" ? "active" : ""}`}
+              onClick={() => navigate("/chat")}
+            >
+              <ChatbubbleEllipsesOutline className="tab-icon" />
+              <span>Chat</span>
+            </div>
+            <div
+              className={`tab ${activeTab === "History" ? "active" : ""}`}
+              onClick={() => navigate("/chat/history")}
+            >
+              <span className="tab-icon-placeholder">🕒</span>
+              <span>History</span>
+            </div>
+            <div
+              className={`tab ${activeTab === "Setting" ? "active" : ""}`}
+              onClick={() => navigate("/chat/setting")}
+            >
+              <span className="tab-icon-placeholder">⚙️</span>
+              <span>Setting</span>
+            </div>
           </div>
-          <div
-            className={`tab ${activeTab === "History" ? "active" : ""}`}
-            onClick={() => setActiveTab("History")}
-          >
-            <span className="tab-icon-placeholder">🕒</span>
-            <span>History</span>
-          </div>
-          <div
-            className={`tab ${activeTab === "Setting" ? "active" : ""}`}
-            onClick={() => setActiveTab("Setting")}
-          >
-            <span className="tab-icon-placeholder">⚙️</span>
-            <span>Setting</span>
-          </div>
-        </div>
+        )}
 
         {/* Main Content Area */}
         <div className="chat-content-area" ref={scrollRef}>
