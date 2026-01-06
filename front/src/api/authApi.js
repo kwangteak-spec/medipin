@@ -8,6 +8,8 @@ export const loginApi = async (email, password) => {
     const response = await axios.post(`${API_BASE_URL}/auth/login`, {
       email,
       password,
+    }, {
+      headers: { "Accept": "application/json" }
     });
 
     return response.data; // TokenPair

@@ -14,7 +14,7 @@ export default defineConfig(({ mode }) => ({
       // Mixed Content 오류를 방지하기 위해 프록시를 설정합니다.
       // 이제 front/src/api/config.js에서 API_BASE_URL을 "/api" 로 설정하면 됩니다.
       "/api": {
-        target: "http://172.16.30.3:8000",
+        target: "http://127.0.0.1:8000",
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ""),
       },

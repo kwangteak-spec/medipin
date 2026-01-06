@@ -10,6 +10,7 @@ const Pill = () => <div style={{ width: 30, height: 30, backgroundColor: '#ccc' 
 
 import { useEffect, useState } from "react";
 import { useAlarm } from "../../context/AlarmContext";
+import { API_BASE_URL } from "../../api/config";
 
 // Icons 
 const UserIcon = () => (
@@ -55,8 +56,11 @@ export const MyPageScreen = () => {
 
       try {
         // 1. Fetch Main Profile
-        const profileRes = await fetch("http://localhost:8000/user/profile", {
-          headers: { Authorization: `Bearer ${token}` },
+        const profileRes = await fetch(`${API_BASE_URL}/user/profile`, {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Accept": "application/json"
+          },
         });
         if (profileRes.ok) {
           const data = await profileRes.json();
@@ -64,8 +68,11 @@ export const MyPageScreen = () => {
         }
 
         // 2. Fetch Family Members
-        const familyRes = await fetch("http://localhost:8000/user/family", {
-          headers: { Authorization: `Bearer ${token}` },
+        const familyRes = await fetch(`${API_BASE_URL}/user/family`, {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Accept": "application/json"
+          },
         });
         if (familyRes.ok) {
           const familyData = await familyRes.json();
