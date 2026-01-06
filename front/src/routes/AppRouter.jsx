@@ -23,6 +23,7 @@ import EditMyPage from "../pages/EditMyPage/Editmypage";
 import AddFamily from "../pages/AddFamily/AddFamily";
 import EditFamily from "../pages/EditFamily/EditFamily";
 import { MyPageScreen } from "../pages/MyPage/MyPage";
+import NotificationList from "../pages/NotificationList/NotificationList";
 
 // 지도
 import MapMain from "../pages/Map_main/MapMain";
@@ -61,6 +62,9 @@ function AppRouter() {
         {/* 캘린더 */}
         <Route path="/calendar" element={<Calendar />} />
         <Route path="/pill-management" element={<Calendar />} />
+
+        {/* 알림 목록 페이지 */}
+        <Route path="/notifications" element={<NotificationList />} />
       </Route>
 
       {/* 2. HomeBar(하단바)가 있는 페이지들 - MainLayout */}
