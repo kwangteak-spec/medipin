@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 from app.db import get_db
 from pyproj import Transformer
+from math import radians, cos, sin, asin, sqrt
 
 
 transformer = Transformer.from_crs(
@@ -225,20 +226,42 @@ def get_emergency_hospitals(
 @map_router.get("/search")
 def search_places(
     keyword: str = Query(..., min_length=1),
+    lat: float = Query(None),
+    lng: float = Query(None),
+    radius: float = Query(5000),  # Default 5km (not strictly used if we just sort by distance)
     db: Session = Depends(get_db)
 ):
+    """
+    Search by keyword with distance sorting (Location Bias).
+    """
     keyword_pattern = f"%{keyword}%"
     results = []
+    
+    # 6371 * ... formula for distance in km
+    dist_sql = "0"
+    order_clause = ""
+    params = {"kw": keyword_pattern}
+    
+    if lat is not None and lng is not None:
+        # Distance calculation
+        dist_sql = f"(6371 * acos(least(1.0, greatest(-1.0, cos(radians(:lat)) * cos(radians(y)) * cos(radians(x) - radians(:lng)) + sin(radians(:lat)) * sin(radians(y))))))"
+        params.update({"lat": lat, "lng": lng})
+        order_clause = "ORDER BY distance ASC"
+    else:
+        order_clause = "ORDER BY name ASC"
 
-    # 1. Hospitals
+    # 1. Hospitals (master_medical)
     try:
-        stmt_h = text("""
-            SELECT name, y as lat, x as lng, address, tel, homepage, 'hospital' as type
+        stmt_h = text(f"""
+            SELECT name, y as lat, x as lng, address, tel, homepage, 'hospital' as type,
+            {dist_sql} as distance
             FROM master_medical
-            WHERE name LIKE :kw AND x IS NOT NULL AND y IS NOT NULL
-            LIMIT 50
+            WHERE (name LIKE :kw OR departments LIKE :kw)
+              AND x IS NOT NULL AND y IS NOT NULL
+            {order_clause}
+            LIMIT 100
         """)
-        rows_h = db.execute(stmt_h, {"kw": keyword_pattern}).fetchall()
+        rows_h = db.execute(stmt_h, params).fetchall()
         for r in rows_h:
             results.append({
                 "name": r.name,
@@ -247,20 +270,24 @@ def search_places(
                 "address": r.address,
                 "tel": r.tel,
                 "homepage": r.homepage if hasattr(r, 'homepage') else "",
-                "type": "hospital"
+                "type": "hospital",
+                "distance": r.distance if hasattr(r, 'distance') else 0
             })
     except Exception as e:
         print(f"Search Hospitals Error: {e}")
 
-    # 2. Pharmacies
+    # 2. Pharmacies (pharmacy)
     try:
-        stmt_p = text("""
-            SELECT `약국명` as name, `y` as lat, `x` as lng, `주소` as address, `전화번호` as tel, 'pharmacy' as type
+        stmt_p = text(f"""
+            SELECT `약국명` as name, `y` as lat, `x` as lng, `주소` as address, `전화번호` as tel, 'pharmacy' as type,
+            {dist_sql} as distance
             FROM pharmacy
-            WHERE `약국명` LIKE :kw AND x IS NOT NULL AND y IS NOT NULL
-            LIMIT 50
+            WHERE `약국명` LIKE :kw 
+              AND x IS NOT NULL AND y IS NOT NULL
+            {order_clause}
+            LIMIT 100
         """)
-        rows_p = db.execute(stmt_p, {"kw": keyword_pattern}).fetchall()
+        rows_p = db.execute(stmt_p, params).fetchall()
         for r in rows_p:
             results.append({
                 "name": r.name,
@@ -268,46 +295,61 @@ def search_places(
                 "lng": float(r.lng),
                 "address": r.address,
                 "tel": r.tel,
-                "type": "pharmacy"
+                "type": "pharmacy",
+                "distance": r.distance if hasattr(r, 'distance') else 0
             })
     except Exception as e:
         print(f"Search Pharmacies Error: {e}")
 
     # 3. Convenience Stores (safe_pharmacy)
+    # This DB uses EPSG 5181. SQL Haversine is impossible without transform.
+    # We'll fetch by name matches and calculate distance in Python.
     try:
         stmt_c = text("""
             SELECT name, x_coord, y_coord, address, tel, 'convenience' as type
             FROM safe_pharmacy
             WHERE name LIKE :kw AND x_coord IS NOT NULL AND y_coord IS NOT NULL
-            LIMIT 50
+            LIMIT 100
         """)
         rows_c = db.execute(stmt_c, {"kw": keyword_pattern}).fetchall()
+        
+        def haversine(lon1, lat1, lon2, lat2):
+            try:
+                lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
+                dlon = lon2 - lon1 
+                dlat = lat2 - lat1 
+                a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+                c = 2 * asin(sqrt(a)) 
+                return c * 6371
+            except:
+                return 99999
+
         for r in rows_c:
             try:
-                # safe_pharmacy uses EPSG:5181, needs transform to WGS84
-                lng, lat = transformer.transform(float(r.x_coord), float(r.y_coord))
+                lng, lat_val = transformer.transform(float(r.x_coord), float(r.y_coord))
+                dist = 0
+                if lat is not None and lng is not None:
+                    dist = haversine(lng, lat_val, float(lng), float(lat))
+                
                 results.append({
                     "name": r.name,
-                    "lat": lat,
+                    "lat": lat_val,
                     "lng": lng,
                     "address": r.address,
                     "tel": r.tel,
-                    "type": "convenience"
+                    "type": "convenience",
+                    "distance": dist
                 })
-            except:
+            except Exception:
                 continue
     except Exception as e:
         print(f"Search Convenience Error: {e}")
 
-    # Sort by relevance: Exact match > Starts with > Contains
-    def relevance_score(item):
-        name = item['name']
-        if name == keyword:
-            return 0
-        if name.startswith(keyword):
-            return 1
-        return 2
-
-    results.sort(key=relevance_score)
+    # Final Sort
+    if lat is not None and lng is not None:
+        results.sort(key=lambda x: x.get('distance', 99999))
+    else:
+        # Fallback relevance sort
+        results.sort(key=lambda x: 0 if x['name'] == keyword else (1 if x['name'].startswith(keyword) else 2))
 
     return results[:100]

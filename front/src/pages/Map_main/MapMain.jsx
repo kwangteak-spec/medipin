@@ -141,6 +141,9 @@ export const MapMain = () => {
           const handleMapIdle = () => {
             if (timerRef.current) clearTimeout(timerRef.current);
             timerRef.current = setTimeout(() => {
+              // 검색 모드(키워드 있음)일 때는 자동 갱신 중단 (검색 결과 유지)
+              if (keywordRef.current && keywordRef.current.trim()) return;
+
               fetchMarkersInBounds();
             }, 100); // 반응성 상향 (300ms -> 100ms)
           };
@@ -318,8 +321,76 @@ export const MapMain = () => {
 
   // 필터나 키워드 변경 시 재적용
   useEffect(() => {
+    // 키워드가 지워졌을 때(검색 취소) 다시 주변 탐색
+    if (!keyword && !searchText) {
+      if (mapInstance.current) fetchMarkersInBounds();
+    }
     applyFilter();
   }, [filters, keyword]);
+
+
+  /* ------------------------------------------------------------------
+     검색 핸들러 (API 호출)
+     ------------------------------------------------------------------ */
+  const handleSearch = async () => {
+    const kw = searchText.trim();
+    if (!kw) {
+      setKeyword("");
+      return;
+    }
+
+    // 현재 지도 중심(또는 내 위치) 가져오기
+    let lat = DEFAULT_CENTER.lat;
+    let lng = DEFAULT_CENTER.lng;
+    if (mapInstance.current) {
+      const center = mapInstance.current.getCenter();
+      lat = center.getLat();
+      lng = center.getLng();
+    }
+
+    try {
+      // API 호출 (radius는 백엔드에서 soft limit으로 사용되거나 distance sorting 유도)
+      const res = await fetch(`${API_URL}/search?keyword=${encodeURIComponent(kw)}&lat=${lat}&lng=${lng}&radius=5000`);
+
+      if (res.ok) {
+        const data = await res.json();
+
+        if (data.length === 0) {
+          alert(`'${kw}' 주변 검색 결과가 없습니다.\n지도를 이동하거나 검색어를 변경해보세요.`);
+          return;
+        }
+
+        // 결과 분류 및 마커 생성
+        const hospitals = data.filter(d => d.type === 'hospital');
+        const pharmacies = data.filter(d => d.type === 'pharmacy');
+        const stores = data.filter(d => d.type === 'convenience');
+        // search endpoint에서 emergency 타입이 별도로 오는지 확인 필요 (현재는 hospital type)
+
+        // 기존 마커 교체
+        clearMarkers();
+        markersRef.current = {
+          hospital: createMarkerObjects(hospitals, 'hospital'),
+          pharmacy: createMarkerObjects(pharmacies, 'pharmacy'),
+          convenience: createMarkerObjects(stores, 'convenience'),
+          emergency: [] // 검색 결과에서는 응급실 구분 로직이 약할 수 있음
+        };
+
+        setKeyword(kw); // 필터 적용 트리거
+
+        // 가장 가까운 결과로 지도 이동
+        if (data.length > 0 && mapInstance.current) {
+          const first = data[0];
+          const moveLatLon = new window.kakao.maps.LatLng(first.lat, first.lng);
+          mapInstance.current.panTo(moveLatLon);
+          // 너무 멀리 이동했으면 줌 조절?
+          // mapInstance.current.setLevel(5);
+        }
+      }
+    } catch (err) {
+      console.error("Search Error:", err);
+      alert("검색 중 오류가 발생했습니다.");
+    }
+  };
 
 
   const moveToMyLocation = () => {
@@ -456,7 +527,7 @@ export const MapMain = () => {
           <InputBar
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            onSearch={() => setKeyword(searchText)} // 엔터/아이콘 클릭 시 필터 적용
+            onSearch={handleSearch} // API 기반 검색 연결
             placeholder="병원, 약국 검색"
           />
           <FilterIconGroup
