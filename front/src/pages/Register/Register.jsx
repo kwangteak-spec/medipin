@@ -121,88 +121,90 @@ const Register = () => {
 
       <Element variant="simple" />
 
-      <div className="frame-2">
-        <div className="frame-3">
-          <div className="frame-wrapper">
-            <div className="div-wrapper">
-              <button onClick={() => navigate(-1)} className="register-back-btn">
-                <BackIcon />
-              </button>
-              <div className="text-wrapper-2">Join our PIN!</div>
+      <div className="register-content">
+        <div className="frame-2">
+          <div className="frame-3">
+            <div className="frame-wrapper">
+              <div className="div-wrapper">
+                <button onClick={() => navigate(-1)} className="register-back-btn">
+                  <BackIcon />
+                </button>
+                <div className="text-wrapper-2">Join our PIN!</div>
+              </div>
+            </div>
+
+            <div className="frame-4">
+              <div className="frame-5">
+                <div className="input-wrap">
+                  <input value={email} onChange={(e) => setEmail(e.target.value)} />
+                  {!email && <span>ID (E-mail)</span>}
+                </div>
+                <img className="line" src={line} alt="" />
+              </div>
+
+              <div className="frame-5">
+                <div className="input-wrap">
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  {!password && <span>Password</span>}
+                </div>
+                <img className="line" src={line} alt="" />
+              </div>
+
+              <div className="frame-5">
+                <div className="input-wrap">
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                  />
+                  {!confirmPassword && <span>Confirm Password</span>}
+                </div>
+                <img className="line" src={line} alt="" />
+              </div>
+
+              <div className="frame-5">
+                <div className="input-wrap">
+                  <input value={name} onChange={(e) => setName(e.target.value)} />
+                  {!name && <span>Name</span>}
+                </div>
+                <img className="line" src={line} alt="" />
+              </div>
+
+              <div className="frame-5">
+                <div className="input-wrap">
+                  <input
+                    value={phoneNum}
+                    onChange={(e) => setPhoneNum(e.target.value)}
+                  />
+                  {!phoneNum && <span>Phone-number</span>}
+                </div>
+                <img className="line" src={line} alt="" />
+              </div>
+
+              <div className="frame-5">
+                <div className="input-wrap">
+                  <input
+                    type="number"
+                    value={age}
+                    onChange={(e) => setAge(e.target.value)}
+                  />
+                  {!age && <span>Age</span>}
+                </div>
+                <img className="line" src={line} alt="" />
+              </div>
             </div>
           </div>
 
-          <div className="frame-4">
-            <div className="frame-5">
-              <div className="input-wrap">
-                <input value={email} onChange={(e) => setEmail(e.target.value)} />
-                {!email && <span>ID (E-mail)</span>}
-              </div>
-              <img className="line" src={line} alt="" />
-            </div>
-
-            <div className="frame-5">
-              <div className="input-wrap">
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-                {!password && <span>Password</span>}
-              </div>
-              <img className="line" src={line} alt="" />
-            </div>
-
-            <div className="frame-5">
-              <div className="input-wrap">
-                <input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                />
-                {!confirmPassword && <span>Confirm Password</span>}
-              </div>
-              <img className="line" src={line} alt="" />
-            </div>
-
-            <div className="frame-5">
-              <div className="input-wrap">
-                <input value={name} onChange={(e) => setName(e.target.value)} />
-                {!name && <span>Name</span>}
-              </div>
-              <img className="line" src={line} alt="" />
-            </div>
-
-            <div className="frame-5">
-              <div className="input-wrap">
-                <input
-                  value={phoneNum}
-                  onChange={(e) => setPhoneNum(e.target.value)}
-                />
-                {!phoneNum && <span>Phone-number</span>}
-              </div>
-              <img className="line" src={line} alt="" />
-            </div>
-
-            <div className="frame-5">
-              <div className="input-wrap">
-                <input
-                  type="number"
-                  value={age}
-                  onChange={(e) => setAge(e.target.value)}
-                />
-                {!age && <span>Age</span>}
-              </div>
-              <img className="line" src={line} alt="" />
-            </div>
-          </div>
+          <Button
+            one="register"
+            className="button-instance"
+            onClick={handleRegister}
+          />
         </div>
-
-        <Button
-          one="register"
-          className="button-instance"
-          onClick={handleRegister}
-        />
       </div>
     </div>
   );

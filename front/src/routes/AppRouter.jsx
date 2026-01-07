@@ -42,11 +42,14 @@ import ChattingMain from "../pages/Chat/ChattingMain";
 function AppRouter() {
   return (
     <Routes>
-      {/* 모든 페이지에 하단바 적용 (MainLayout 통합) */}
-      <Route element={<MainLayout />}>
-        {/* 로그인/회원가입 */}
+      {/* Welcome 및 초기 진입 (하단바 없음) */}
+      <Route element={<EmptyLayout />}>
         <Route path="/" element={<Welcome />} />
         <Route path="/welcome" element={<Welcome />} />
+      </Route>
+
+      {/* 나머지 페이지 (하단바 포함) */}
+      <Route element={<MainLayout />}>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
