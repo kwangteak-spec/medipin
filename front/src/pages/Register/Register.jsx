@@ -13,6 +13,13 @@ const API_URL = `${API_BASE_URL}/register`;
 const Register = () => {
   const navigate = useNavigate();
 
+  // Back button icon
+  const BackIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M15 18L9 12L15 6" />
+    </svg>
+  );
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -118,6 +125,9 @@ const Register = () => {
         <div className="frame-3">
           <div className="frame-wrapper">
             <div className="div-wrapper">
+              <button onClick={() => navigate(-1)} className="register-back-btn">
+                <BackIcon />
+              </button>
               <div className="text-wrapper-2">Join our PIN!</div>
             </div>
           </div>

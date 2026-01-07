@@ -28,6 +28,35 @@
   font-weight: 800;
 }
 
+.register .div-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.register .register-back-btn {
+  background: #e8daf7;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.register .register-back-btn:hover {
+  background: #dcc9f3;
+}
+
+.register .register-back-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
 /* 입력 영역 */
 .register .frame-4 {
   display: flex;
