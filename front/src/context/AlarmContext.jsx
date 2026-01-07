@@ -26,11 +26,17 @@ export const AlarmProvider = ({ children }) => {
     // 서버에서 읽지 않은 알림 확인
     const checkPendingAlarms = useCallback(async () => {
         const storedUserId = localStorage.getItem("userId");
-        if (!storedUserId) return;
+        const token = localStorage.getItem("authToken");
+
+        // 로그아웃 상태(토큰 없음)라면 중단
+        if (!storedUserId || !token) return;
 
         try {
             const res = await fetch(`${API_BASE_URL}/alarms/pending?user_id=${storedUserId}`, {
-                headers: { "Accept": "application/json" }
+                headers: {
+                    "Accept": "application/json",
+                    "Authorization": `Bearer ${token}`
+                }
             });
             if (res.ok) {
                 const alarms = await res.json();
@@ -53,6 +59,9 @@ export const AlarmProvider = ({ children }) => {
                         } catch (e) { console.error("Notification Error:", e); }
                     }
                 }
+            } else if (res.status === 401) {
+                // 토큰 만료 등 처리 필요 시 추가
+                console.warn("Unauthorized alarm fetch");
             }
         } catch (error) {
             console.error("Error checking pending alarms:", error);

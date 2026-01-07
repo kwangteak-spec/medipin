@@ -21,13 +21,24 @@ const NotificationList = () => {
     }, []);
 
     const fetchNotifications = async () => {
+        const token = localStorage.getItem("authToken");
+        if (!token) return;
+
         setLoading(true);
         try {
             // 알림 히스토리 API 호출
-            const res = await fetch(`${API_BASE_URL}/alarms/history?user_id=${USER_ID}`);
+            const res = await fetch(`${API_BASE_URL}/alarms/history?user_id=${USER_ID}`, {
+                headers: {
+                    "Accept": "application/json",
+                    "Authorization": `Bearer ${token}`
+                }
+            });
             if (res.ok) {
                 const data = await res.json();
                 setNotifications(data);
+            } else if (res.status === 401) {
+                console.warn("Unauthorized notification fetch");
+                // navigate('/login'); // 필요 시 로그인 페이지로 이동
             }
         } catch (error) {
             console.error(error);
