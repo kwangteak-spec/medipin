@@ -20,8 +20,8 @@ const MapList = ({ sheetState, setSheetState, places = [], selectedPlace, setSel
     const getTranslateY = () => {
         const vh = window.innerHeight;
         // 하단 네비게이션(약 80px) 고려
-        if (sheetState === SHEET.CLOSED) return vh - 90; // 네비게이션 위로 살짝 올라온 상태 (핸들만 보임)
-        if (sheetState === SHEET.MIN) return vh - 300; // 일부 보임
+        if (sheetState === SHEET.CLOSED) return vh; // 아예 보이지 않게 숨김
+        if (sheetState === SHEET.MIN) return vh - 400; // 살짝 내려서 적절한 높이 유지
         if (sheetState === SHEET.FULL) return 100; // 거의 다 보임
         return vh;
     };
@@ -35,41 +35,56 @@ const MapList = ({ sheetState, setSheetState, places = [], selectedPlace, setSel
     /* 드래그 시작 */
     const onStart = (e) => {
         setDragging(true);
-        startY.current = e.touches ? e.touches[0].clientY : e.clientY;
+        const y = e.touches ? e.touches[0].clientY : e.clientY;
+        startY.current = y;
+        currentY.current = y;
     };
 
-    /* 드래그 중 */
-    const onMove = (e) => {
+    /* 드래그 중 및 종료 핸들러를 useEffect로 관리 (글로벌 리스너) */
+    useEffect(() => {
         if (!dragging) return;
-        currentY.current = e.touches ? e.touches[0].clientY : e.clientY;
-        const delta = currentY.current - startY.current;
 
-        // 현재 기준 위치 + 델타
-        sheetRef.current.style.transform =
-            `translate(-50%, ${getTranslateY() + delta}px)`;
-    };
+        const handleMove = (e) => {
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            currentY.current = clientY;
+            const delta = clientY - startY.current;
 
-    /* 드래그 종료 */
-    const onEnd = () => {
-        if (!dragging) return;
-        setDragging(false);
-        const delta = currentY.current - startY.current;
+            if (sheetRef.current) {
+                // 실시간 드래그 반영 (1:1 추적)
+                sheetRef.current.style.transform = `translate(-50%, ${getTranslateY() + delta}px)`;
+            }
+        };
 
-        // 위로 많이 드래그하면 FULL
-        if (delta < -50) {
-            if (sheetState === SHEET.CLOSED) setSheetState(SHEET.MIN);
-            else setSheetState(SHEET.FULL);
-        }
-        // 아래로 많이 드래그하면 CLOSED/MIN
-        else if (delta > 50) {
-            if (sheetState === SHEET.FULL) setSheetState(SHEET.MIN);
-            else setSheetState(SHEET.CLOSED);
-        }
-        else {
-            // 원복
-            sheetRef.current.style.transform = `translate(-50%, ${getTranslateY()}px)`;
-        }
-    };
+        const handleEnd = () => {
+            setDragging(false);
+            const delta = currentY.current - startY.current;
+
+            // 스냅 로직
+            if (delta < -80) { // 위로 충분히 올림
+                if (sheetState === SHEET.MIN) setSheetState(SHEET.FULL);
+            } else if (delta > 80) { // 아래로 충분히 내림
+                if (sheetState === SHEET.FULL) setSheetState(SHEET.MIN);
+                else setSheetState(SHEET.CLOSED);
+            } else {
+                // 원복
+                if (sheetRef.current) {
+                    sheetRef.current.style.transform = `translate(-50%, ${getTranslateY()}px)`;
+                }
+            }
+        };
+
+        window.addEventListener("mousemove", handleMove);
+        window.addEventListener("mouseup", handleEnd);
+        window.addEventListener("touchmove", handleMove, { passive: false });
+        window.addEventListener("touchend", handleEnd);
+
+        return () => {
+            window.removeEventListener("mousemove", handleMove);
+            window.removeEventListener("mouseup", handleEnd);
+            window.removeEventListener("touchmove", handleMove);
+            window.removeEventListener("touchend", handleEnd);
+        };
+    }, [dragging, sheetState]);
 
     const handleCardClick = (place) => {
         // 상세 페이지 이동 대신, 내부 상태 변경으로 Detail View 전환
@@ -88,12 +103,7 @@ const MapList = ({ sheetState, setSheetState, places = [], selectedPlace, setSel
             <div
                 className="handle"
                 onMouseDown={onStart}
-                onMouseMove={onMove}
-                onMouseUp={onEnd}
-                onMouseLeave={onEnd}
                 onTouchStart={onStart}
-                onTouchMove={onMove}
-                onTouchEnd={onEnd}
             >
                 <div className="handle-bar" />
             </div>
@@ -104,7 +114,9 @@ const MapList = ({ sheetState, setSheetState, places = [], selectedPlace, setSel
                     // --- 상세 뷰 ---
                     <div className="detail-view">
                         <button className="back-btn" onClick={handleBackToList}>
-                            &larr; 목록으로
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M15 18L9 12L15 6" stroke="#111" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
                         </button>
                         <div className="detail-image-wrapper">
                             <img

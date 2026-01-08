@@ -9,7 +9,7 @@ from math import radians, cos, sin, asin, sqrt
 
 
 transformer = Transformer.from_crs(
-    "EPSG:5181",  # 또는 5179 / 실제 좌표계 확인
+    "EPSG:5174",  # 원래 5181이었나 강 위치 문제(Bessel/GRS80 편차)로 5174로 수정
     "EPSG:4326",  # 위경도
     always_xy=True
 )
@@ -63,7 +63,7 @@ def get_hospitals(
 
 transformer_reverse = Transformer.from_crs(
     "EPSG:4326",
-    "EPSG:5181",
+    "EPSG:5174",
     always_xy=True
 )
 
@@ -111,10 +111,19 @@ def get_convenience_stores(
     results = []
     for r in rows:
         try:
-            lng, lat = transformer.transform(
-                float(r.x_coord),
-                float(r.y_coord)
-            )
+            xc = float(r.x_coord)
+            yc = float(r.y_coord)
+
+            # Heuristic: Korea WGS84 range check
+            # Normal: yc is lat (33~43), xc is lng (124~132)
+            if 33 <= yc <= 43 and 124 <= xc <= 132:
+                lat, lng = yc, xc
+            # Swapped: xc is lat, yc is lng
+            elif 33 <= xc <= 43 and 124 <= yc <= 132:
+                lat, lng = xc, yc
+            # Otherwise: Assume TM (EPSG:5181 or similar)
+            else:
+                lng, lat = transformer.transform(xc, yc)
 
             results.append({
                 "name": r.name,
@@ -326,7 +335,17 @@ def search_places(
 
         for r in rows_c:
             try:
-                lng, lat_val = transformer.transform(float(r.x_coord), float(r.y_coord))
+                xc = float(r.x_coord)
+                yc = float(r.y_coord)
+                
+                # Heuristic: Korea WGS84 range check
+                if 33 <= yc <= 43 and 124 <= xc <= 132:
+                    lat_val, lng = yc, xc
+                elif 33 <= xc <= 43 and 124 <= yc <= 132:
+                    lat_val, lng = xc, yc
+                else:
+                    lng, lat_val = transformer.transform(xc, yc)
+
                 dist = 0
                 if lat is not None and lng is not None:
                     dist = haversine(lng, lat_val, float(lng), float(lat))

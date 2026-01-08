@@ -3,14 +3,16 @@ import { useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import bearIcon from "../../assets/medipin_bear_icon.png";
 import { API_BASE_URL } from "../../api/config";
-import { Element } from "../../components/Element";
+import { HomeBar } from "../../components/HomeBar/HomeBar";
+import { BackIcon } from "../../components/Icons";
+import { useAlarm } from "../../context/AlarmContext";
 import "./style.css";
 
 const NotificationList = () => {
     const navigate = useNavigate();
+    const { toggleOverlay } = useAlarm();
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
-
     const storedUserId = localStorage.getItem("userId");
     const USER_ID = storedUserId ? parseInt(storedUserId) : 1;
 
@@ -45,12 +47,7 @@ const NotificationList = () => {
         }
     };
 
-    // Header Back Icon (Same as Register)
-    const BackIcon = () => (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M15 18L9 12L15 6" />
-        </svg>
-    );
+    // Icons integrated from centralized component
 
     const getTimeAgo = (item) => {
         if (item.alarm_time) {
@@ -67,57 +64,65 @@ const NotificationList = () => {
 
     return (
         <div className="notification-page">
-            <Element variant="simple" />
+            {/* 헤더 */}
+            <div className="mypage-header">
+                <div style={{ width: 56, display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
+                    <button onClick={() => navigate(-1)} className="mypage-back-btn">
+                        <BackIcon />
+                    </button>
+                </div>
+                <div className="header-title">Notification List</div>
+                <div className="icon-wrapper" onClick={toggleOverlay}>
+                    <div className="icon-alarm" />
+                </div>
+            </div>
 
-            <div className="frame-2">
-                <div className="frame-3">
-                    <div className="frame-wrapper">
-                        <div className="div-wrapper">
-                            <button onClick={() => navigate(-1)} className="register-back-btn">
-                                <BackIcon />
-                            </button>
-                            <div className="text-wrapper-2">Notification List</div>
-                        </div>
-                    </div>
-
-                    <div className="notification-content">
-                        {loading ? (
-                            <div className="loading">Loading...</div>
-                        ) : notifications.length === 0 ? (
-                            <div className="no-data">No notifications found.</div>
-                        ) : (
-                            <div className="noti-list">
-                                {notifications.map((item, index) => {
-                                    const isCompleted = item.is_taken || item.is_read;
-                                    return (
-                                        <div
-                                            key={item.id || index}
-                                            className={`noti-item ${isCompleted ? 'completed' : ''}`}
-                                            onClick={() => handleItemClick(item)}
-                                        >
-                                            <div className="bear-icon">
-                                                <img src={bearIcon} alt="bear" style={{ filter: isCompleted ? 'grayscale(100%)' : 'none' }} />
-                                            </div>
-                                            <div className="noti-info">
-                                                <div className="noti-title">MediPin</div>
-                                                <div className="noti-desc">
-                                                    {item.pill_name ? `${item.pill_name} 복용 시간입니다.` : item.message}
-                                                    <br />
-                                                    <span style={{ fontSize: '11px', color: isCompleted ? '#aaa' : '#9F63FF' }}>
-                                                        {isCompleted ? "확인 완료" : "미복용"}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div className="noti-time">
-                                                {getTimeAgo(item)}
+            <div className="content-scrollable">
+                <div className="notification-list-container">
+                    {loading ? (
+                        <div className="loading">로딩 중...</div>
+                    ) : notifications.length === 0 ? (
+                        <div className="no-data">알림 기록이 없습니다.</div>
+                    ) : (
+                        <div className="noti-list">
+                            {notifications.map((item, index) => {
+                                const isCompleted = item.is_taken || item.is_read;
+                                return (
+                                    <div
+                                        key={item.id || index}
+                                        className={`noti-item ${isCompleted ? 'completed' : ''}`}
+                                        onClick={() => handleItemClick(item)}
+                                    >
+                                        <div className="bear-icon">
+                                            <img src={bearIcon} alt="bear" style={{ filter: isCompleted ? 'grayscale(100%)' : 'none' }} />
+                                        </div>
+                                        <div className="noti-info">
+                                            <div className="noti-title">MediPin</div>
+                                            <div className="noti-desc">
+                                                {item.pill_name ? `${item.pill_name} 복용 시간입니다.` : item.message}
+                                                <br />
+                                                <span className="status-label" style={{ color: isCompleted ? '#aaa' : '#9F63FF' }}>
+                                                    {isCompleted ? "확인 완료" : "미복용"}
+                                                </span>
                                             </div>
                                         </div>
-                                    );
-                                })}
-                            </div>
-                        )}
-                    </div>
+                                        <div className="noti-time">
+                                            {getTimeAgo(item)}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
                 </div>
+                {/* Padding for bottom nav */}
+                <div style={{ height: 80 }}></div>
+            </div>
+
+            {/* 하단 네비게이션 */}
+            <div className="bottom-nav-container">
+                <HomeBar />
+                <div className="bottom-filler"></div>
             </div>
         </div>
     );

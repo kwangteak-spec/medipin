@@ -170,8 +170,10 @@ export const MyPageScreen = () => {
           <MenuRow icon={LogoutIcon} label="Logout" onClick={() => setWarningType("logout")} />
         </div>
 
-        {/* Padding for bottom nav */}
-        <div style={{ height: 80 }}></div>
+      </div>
+
+      <div className="bottom-nav-container">
+        {/* Provides background area for HomeBar */}
       </div>
 
       {/* Warning Modal */}

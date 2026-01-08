@@ -1,0 +1,184 @@
+.add-family-page {
+    width: 100%;
+    height: 100vh;
+    background-color: #9F63FF;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+}
+
+.add-family-header {
+    height: 100px;
+    display: flex;
+    justify-content: center;
+    /* 타이틀 중앙 정렬 */
+    align-items: center;
+    padding: 0 20px;
+    background-color: transparent;
+    color: white;
+    flex-shrink: 0;
+    position: relative;
+    /* 자식 요소 절대 배치를 위함 */
+}
+
+.add-family-header .back-btn {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #EEE6FF;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+.add-family-header .header-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: white;
+}
+
+.add-family-content {
+    flex: 1;
+    background-color: white;
+    /* EditProfile matches this */
+    border-top-left-radius: 30px;
+    border-top-right-radius: 30px;
+    padding: 30px 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    /* Standardized by form-group margins */
+    padding-bottom: 50px;
+}
+
+/* Form Groups matching EditProfile */
+.form-group {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    display: block;
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 8px;
+    text-align: left;
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    background: #F0EBFF;
+    border: none;
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-size: 14px;
+    color: #333;
+    outline: none;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+/* Row Group side-by-side */
+.row-group {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+}
+
+.form-group.half {
+    flex: 1;
+}
+
+/* Radio/Select Style for User/Gender */
+.select-user-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #000;
+    margin-top: 10px;
+    margin-bottom: 4px;
+}
+
+.gender-selection {
+    display: flex;
+    gap: 12px;
+}
+
+.gender-option {
+    flex: 1;
+    background-color: #F0EDFF;
+    padding: 12px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 2px solid transparent;
+}
+
+.gender-option.active {
+    background-color: #E8E2FF;
+    border-color: #9F63FF;
+}
+
+.radio-circle {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid #9F63FF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.radio-circle .inner {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #9F63FF;
+}
+
+.gender-label {
+    font-size: 15px;
+    font-weight: 500;
+    color: #333;
+}
+
+/* Add Button matching EditProfile Save button */
+.add-family-submit-btn {
+    margin-top: 10px;
+    width: 100%;
+    padding: 16px;
+    background: #9F63FF !important;
+    color: white;
+    border: none;
+    border-radius: 16px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(159, 99, 255, 0.4);
+    transition: transform 0.1s;
+}
+
+.add-family-submit-btn:active {
+    transform: scale(0.98);
+}
+
+/* Textarea height */
+.form-input-wrapper textarea {
+    min-height: 100px;
+    resize: none;
+}

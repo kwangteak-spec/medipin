@@ -36,53 +36,49 @@
 /* Page Header */
 .page-header {
     position: absolute;
-    top: 50px;
-    left: 20px;
-    right: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 40px;
-    z-index: 10;
+    top: 40px;
+    left: 16px;
+    right: 16px;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px;
+    height: 50px;
+    z-index: 100;
 }
 
 .back-btn {
+    position: relative !important;
     width: 40px !important;
     height: 40px !important;
     background-color: #EEE6FF !important;
     border-radius: 50% !important;
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 20;
-    padding: 0;
-    /* padding 초기화 */
-}
-
-.back-btn img {
-    width: 18px;
-    height: 18px;
-    object-fit: contain;
+    border: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    flex-shrink: 0 !important;
+    padding: 0 !important;
 }
 
 .header-title-container {
-    flex: 1;
-    display: flex;
-    justify-content: flex-start;
-    /* 좌측 정렬 */
-    margin-left: 10px;
-    /* 아이콘과의 간격 */
+    position: relative !important;
+    flex: 1 !important;
+    display: flex !important;
+    align-items: center !important;
+    overflow: hidden !important;
 }
 
-.search-detail-page .header-title {
-    font-size: 18px;
-    font-weight: 800;
+/* 색상 및 위치 강제 고정 */
+.search-result-final .header-title {
+    font-size: 19px !important;
+    font-weight: 800 !important;
     color: #000000 !important;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    margin: 0 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    text-align: left !important;
 }
 
 /* Image Container */

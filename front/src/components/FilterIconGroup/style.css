@@ -13,17 +13,19 @@
   justify-content: flex-start !important;
 
   overflow-x: auto;
-  /* 가로 스크롤 */
   overflow-y: hidden;
   white-space: nowrap;
 
   -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-
   background-color: transparent;
+
+  /* 스크롤바 숨기기 (IE, Edge) */
+  -ms-overflow-style: none;
+  /* 스크롤바 숨기기 (Firefox) */
+  scrollbar-width: none;
 }
 
-/* Chrome / Safari 스크롤바 숨김 */
+/* Chrome / Safari 스크롤바 숨기기 */
 .filter-icon-group::-webkit-scrollbar {
   display: none;
 }
@@ -82,7 +84,7 @@
 ========================= */
 .filter-item.active {
   background-color: #9F63FF;
-  /* 활성 상태 보라색 */
+  /* 활성 상태 보라색으로 복구 */
   color: #ffffff !important;
   /* ⭐ 텍스트 흰색 강제 */
   border-color: #9F63FF;

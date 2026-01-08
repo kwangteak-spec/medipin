@@ -6,6 +6,7 @@ import { HomeBar } from "../../components/HomeBar/HomeBar";
 import preIcon from "./pre_icon.svg";
 import pillPic from "./pill_pic.svg";
 import AddScheduleModal from "../../components/AddScheduleModal/AddScheduleModal"; // ✅ Import
+import { BackIcon } from "../../components/Icons";
 import "./style.css";
 
 /* 헤더 컴포넌트 */
@@ -150,7 +151,7 @@ const SearchResultInfo = () => {
         {/* 뒤로가기 & 타이틀 */}
         <div className="page-header">
           <button className="back-btn" onClick={() => navigate(-1)}>
-            <img src={preIcon} alt="Back" />
+            <BackIcon size={20} />
           </button>
           <div className="header-title-container">
             <h2 className="header-title" style={{ color: "black" }}>{drugDetail.drug_name || drugDetail.item_name}</h2>

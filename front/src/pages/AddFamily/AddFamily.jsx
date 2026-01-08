@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "../MyPage/style.css"; // Reuse MyPage/EditMyPage styles
+import "./style.css"; // Modern form style
 import { API_BASE_URL } from "../../api/config";
+import { BackIcon, CalendarIcon } from "../../components/Icons";
 
 const AddFamily = () => {
     const navigate = useNavigate();
@@ -18,11 +19,14 @@ const AddFamily = () => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    const handleGenderSelect = (gender) => {
+        setFormData({ ...formData, gender });
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         const token = localStorage.getItem("authToken");
 
-        // Calculate age roughly
         const birthDate = new Date(formData.birthdate);
         const today = new Date();
         let age = today.getFullYear() - birthDate.getFullYear();
@@ -65,107 +69,100 @@ const AddFamily = () => {
         }
     };
 
+    // Icons removed - now using centralized Icons component
+
     return (
-        <div className="my-page-container" style={{ backgroundColor: 'white' }}>
-            {/* Header reusing MyPage header style but with white bg override if needed or just use container */}
-            <div className="mypage-header" style={{ backgroundColor: '#9F63FF' }}>
-                <button onClick={() => navigate(-1)} className="back-btn">⬅</button>
+        <div className="add-family-page">
+            {/* Header matching EditProfile style */}
+            <div className="add-family-header">
+                <button onClick={() => navigate(-1)} className="back-btn">
+                    <BackIcon />
+                </button>
                 <div className="header-title">Add Family</div>
-                <div style={{ width: 24 }}></div>
             </div>
 
-            <div className="content-scrollable" style={{ marginTop: 0, paddingTop: 20 }}>
-                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 15 }}>
-                    <div>
-                        <label style={{ display: 'block', marginBottom: 5, fontWeight: 'bold' }}>이름</label>
+            <div className="add-family-content">
+                <form onSubmit={handleSubmit}>
+                    {/* Name */}
+                    <div className="form-group">
+                        <label>Name</label>
                         <input
                             type="text"
                             name="name"
+                            placeholder="Enter family member's name"
                             value={formData.name}
                             onChange={handleChange}
                             required
-                            style={{ width: '100%', padding: 12, border: '1px solid #ddd', borderRadius: 8 }}
                         />
                     </div>
 
-                    <div>
-                        <label style={{ display: 'block', marginBottom: 5, fontWeight: 'bold' }}>생년월일</label>
-                        <input
-                            type="date"
-                            name="birthdate"
-                            value={formData.birthdate}
-                            onChange={handleChange}
-                            required
-                            style={{ width: '100%', padding: 12, border: '1px solid #ddd', borderRadius: 8 }}
-                        />
+                    {/* Birthdate & Gender */}
+                    <div className="row-group">
+                        <div className="form-group half">
+                            <label>Birthdate</label>
+                            <input
+                                type="date"
+                                name="birthdate"
+                                value={formData.birthdate}
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+
+                        <div className="form-group" style={{ width: '120px' }}>
+                            <label>Gender</label>
+                            <select
+                                name="gender"
+                                value={formData.gender}
+                                onChange={handleChange}
+                            >
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <div>
-                        <label style={{ display: 'block', marginBottom: 5, fontWeight: 'bold' }}>성별</label>
-                        <select
-                            name="gender"
-                            value={formData.gender}
-                            onChange={handleChange}
-                            style={{ width: '100%', padding: 12, border: '1px solid #ddd', borderRadius: 8 }}
-                        >
-                            <option value="male">남성</option>
-                            <option value="female">여성</option>
-                        </select>
-                    </div>
-
-                    <div style={{ display: 'flex', gap: 10 }}>
-                        <div style={{ flex: 1 }}>
-                            <label style={{ display: 'block', marginBottom: 5, fontWeight: 'bold' }}>키 (cm)</label>
+                    {/* Height & Weight */}
+                    <div className="row-group">
+                        <div className="form-group half">
+                            <label>Height (cm)</label>
                             <input
                                 type="number"
                                 name="height"
+                                placeholder="cm"
                                 value={formData.height}
                                 onChange={handleChange}
-                                placeholder="Optional"
-                                style={{ width: '100%', padding: 12, border: '1px solid #ddd', borderRadius: 8 }}
                             />
                         </div>
-                        <div style={{ flex: 1 }}>
-                            <label style={{ display: 'block', marginBottom: 5, fontWeight: 'bold' }}>몸무게 (kg)</label>
+
+                        <div className="form-group half">
+                            <label>Weight (kg)</label>
                             <input
                                 type="number"
                                 name="weight"
+                                placeholder="kg"
                                 value={formData.weight}
                                 onChange={handleChange}
-                                placeholder="Optional"
-                                style={{ width: '100%', padding: 12, border: '1px solid #ddd', borderRadius: 8 }}
                             />
                         </div>
                     </div>
 
-                    <div>
-                        <label style={{ display: 'block', marginBottom: 5, fontWeight: 'bold' }}>특이사항 (알러지 등)</label>
+                    {/* Special Note */}
+                    <div className="form-group">
+                        <label>Special Note (Allergies, etc)</label>
                         <textarea
                             name="special_note"
+                            placeholder="Memo"
                             value={formData.special_note}
                             onChange={handleChange}
                             rows={3}
-                            placeholder="예: 페니실린 알러지 있음"
-                            style={{ width: '100%', padding: 12, border: '1px solid #ddd', borderRadius: 8 }}
                         />
                     </div>
 
-                    <button
-                        type="submit"
-                        style={{
-                            marginTop: 30,
-                            backgroundColor: '#9F63FF',
-                            color: 'white',
-                            padding: 15,
-                            border: 'none',
-                            borderRadius: 12,
-                            fontSize: 16,
-                            fontWeight: 'bold',
-                            cursor: 'pointer'
-                        }}
-                    >
-                        등록하기
+                    <button type="submit" className="add-family-submit-btn">
+                        Create Family Member
                     </button>
+                    <div style={{ height: '100px' }}></div>
                 </form>
             </div>
         </div>

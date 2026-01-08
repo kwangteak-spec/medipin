@@ -221,6 +221,13 @@
   align-items: center;
 }
 
+.bottom-nav-container {
+  width: 100%;
+  background-color: #F8F9FA;
+  height: 110px;
+  flex-shrink: 0;
+}
+
 .menu-divider {
   height: 1px;
   background-color: #EEE;

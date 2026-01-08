@@ -9,6 +9,7 @@ import { API_BASE_URL } from "../../api/config";
 import AddScheduleModal from "../../components/AddScheduleModal/AddScheduleModal"; // ✅ Import Modal
 
 import { useAlarm } from "../../context/AlarmContext";
+import { BackIcon } from "../../components/Icons";
 import "./style.css";
 
 const SearchDetail = () => {
@@ -16,12 +17,7 @@ const SearchDetail = () => {
   const { toggleOverlay } = useAlarm();
   const { query } = useParams(); // ✅ 검색어 URL 파라미터
 
-  // Icons
-  const BackIcon = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M15 18L9 12L15 6" />
-    </svg>
-  );
+  // Icons integrated from centralized component
 
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -82,7 +78,7 @@ const SearchDetail = () => {
             <BackIcon />
           </button>
         </div>
-        <div className="header-title">My page</div>
+        <div className="header-title">Search List</div>
         <div className="icon-wrapper" onClick={toggleOverlay}>
           <div className="icon-alarm" />
         </div>
@@ -90,12 +86,7 @@ const SearchDetail = () => {
 
       <div className="content-scrollable">
         {/* 결과 영역 */}
-        <div className="search-result-2">
-          {/* 타이틀 표시 (필요 시) */}
-          <h2 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '20px' }}>
-            {query ? `"${query}" 검색 결과` : "Search List"}
-          </h2>
-
+        <div className="search-result-2" style={{ padding: '24px 20px' }}>
           {/* Case A: 검색 모드 */}
           {query && (
             <>
@@ -173,6 +164,7 @@ const SearchDetail = () => {
       {/* 하단 네비게이션 */}
       <div className="bottom-nav-container">
         <HomeBar />
+        <div className="bottom-filler"></div>
       </div>
     </div>
   );

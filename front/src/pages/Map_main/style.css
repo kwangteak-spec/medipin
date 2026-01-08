@@ -68,3 +68,44 @@
     transform: translate(-50%, -50%);
     /* 중심점 맞춤 */
 }
+
+/* 주소 검색 마커 스타일 */
+.address-search-marker {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    pointer-events: none;
+}
+
+.address-search-marker .pin {
+    width: 28px;
+    height: 28px;
+    background-color: #9F63FF;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.address-search-marker .pin .dot {
+    width: 8px;
+    height: 8px;
+    background-color: white;
+    border-radius: 50%;
+    transform: rotate(45deg);
+}
+
+.address-search-marker .label {
+    margin-top: 6px;
+    padding: 2px 8px;
+    background-color: white;
+    border: 1.5px solid #9F63FF;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #000;
+    white-space: nowrap;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}

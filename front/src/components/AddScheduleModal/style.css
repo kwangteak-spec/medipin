@@ -55,18 +55,45 @@
 }
 
 .form-group input,
-.form-group textarea {
+.form-group textarea,
+.timing-select {
     width: 100%;
     padding: 14px 16px;
     border: none;
-    /* Removed border */
     border-radius: 12px;
     font-size: 14px;
     box-sizing: border-box;
     transition: background-color 0.2s;
     background-color: #F0EBFF;
-    /* Light lavender background */
     color: #333;
+}
+
+.form-group {
+    position: relative;
+}
+
+.form-group input[type="date"]::-webkit-calendar-picker-indicator {
+    background: transparent;
+    bottom: 0;
+    color: transparent;
+    cursor: pointer;
+    height: auto;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: auto;
+    z-index: 2;
+}
+
+.form-group .input-icon {
+    position: absolute;
+    right: 12px;
+    top: 40px;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .form-group input:focus,
@@ -79,7 +106,17 @@
 
 .row-group {
     display: flex;
-    gap: 10px;
+    gap: 12px;
+}
+
+.timing-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.timing-row {
+    display: flex;
+    align-items: center;
 }
 
 .form-group.half {

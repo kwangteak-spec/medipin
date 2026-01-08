@@ -1,7 +1,8 @@
 .search-result-in {
-  height: 169px;
+  aspect-ratio: 1 / 1;
+  /* 정사각형 비율 설정 */
   position: relative;
-  width: 156px;
+  width: 100%;
 }
 
 .search-result-in .search-result {
@@ -9,10 +10,11 @@
   background-color: #ffffff;
   border-radius: 10px;
   display: flex;
-  gap: 10px;
+  gap: 6px;
   height: 100%;
   justify-content: center;
-  padding: 10px;
+  padding: 8px;
+  /* 패딩 축소 */
   width: 100%;
 }
 
@@ -20,26 +22,33 @@
   align-items: center;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
+  /* 간격 축소 */
   justify-content: center;
-  width: 146px;
+  width: 100%;
 }
 
 .search-result-in .image-icon {
-  width: 103.16px;
-  height: 103.16px;
-  border-radius: 20px;
-  overflow: hidden;
+  width: 100px;
+  /* 3열 레이아웃에서 꽉 차게 보이도록 함 */
+  height: 100px;
+  border-radius: 15px;
+  /* overflow: hidden 삭제하여 버튼이 잘리지 않게 함 */
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f1f1f1;
+  background-color: #ffffff;
+  position: relative;
+  /* 버튼 배치를 위해 유지 */
 }
 
 .search-result-in .drug-db-image {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  border-radius: 20px;
+  /* 여기서 따로 보정 */
+  /* 사진 전체가 보이도록 변경 */
 }
 
 .search-result-in .image-placeholder {
@@ -50,23 +59,29 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 20px;
 }
 
 .search-result-in .text-wrapper {
   align-self: stretch;
   color: #000000;
   font-family: "Inter-Regular", Helvetica;
-  font-size: 14px;
+  font-size: 13px;
+  /* 내용물 유지 */
   font-weight: 400;
-  letter-spacing: 0.5px;
-  line-height: 16px;
+  letter-spacing: 0.3px;
+  line-height: 15px;
   text-align: center;
 }
 
 .search-result-in .frame-2 {
   position: absolute;
-  top: 12.43%;
-  right: 10%;
-  width: 15.38%;
+  top: -4px;
+  right: -4px;
+  width: 26px;
+  height: 26px;
   cursor: pointer;
+  z-index: 10;
+  /* 버튼이 더 돋보이게 그림자 추가 */
+  filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.15));
 }

@@ -18,6 +18,17 @@ const SHEET = {
   FULL: "FULL",
 };
 
+const MyLocationIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="8" />
+    <line x1="12" y1="2" x2="12" y2="5" />
+    <line x1="12" y1="19" x2="12" y2="22" />
+    <line x1="2" y1="12" x2="5" y2="12" />
+    <line x1="19" y1="12" x2="22" y2="12" />
+    <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+  </svg>
+);
+
 export const MapMain = () => {
   const mapContainerRef = useRef(null);
   const mapInstance = useRef(null);
@@ -30,7 +41,16 @@ export const MapMain = () => {
     emergency: [], // 응급실
   });
   const myLocationOverlayRef = useRef(null); // 내 위치 오버레이
+  const addressOverlayRef = useRef(null); // 주소 검색 결과 오버레이
+  const selectedMarkerRef = useRef(null); // 현재 확대된 마커
   const timerRef = useRef(null); // 디바운스 타이머 Refs
+
+  const iconMap = {
+    hospital: hospitalIcon,
+    pharmacy: pharmacyIcon,
+    convenience: convIcon,
+    emergency: sosIcon,
+  };
 
   // 데이터 상태
   const [searchText, setSearchText] = useState(""); // 검색창 입력값
@@ -49,36 +69,39 @@ export const MapMain = () => {
     favorites: false,
   });
 
-  // Sidebar States - REMOVED
-  // const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [radius, setRadius] = useState(1000);
-  const [currentCity, setCurrentCity] = useState("");
   const geocoderRef = useRef(null);
   const radiusCircleRef = useRef(null); // 반경 원 Overlay
 
   // 클로저 문제 해결을 위한 Refs
   const filtersRef = useRef(filters);
   const keywordRef = useRef(keyword);
+  const sheetStateRef = useRef(sheetState);
 
   // 상태 동기화
   useEffect(() => { filtersRef.current = filters; }, [filters]);
   useEffect(() => { keywordRef.current = keyword; }, [keyword]);
-
+  useEffect(() => { sheetStateRef.current = sheetState; }, [sheetState]);
 
   const API_URL = `${API_BASE_URL}/map`;
 
-  /* 필터 토글 */
   const toggleFilter = (key) => {
     setFilters((prev) => {
-      const next = { ...prev, [key]: !prev[key] };
-      // 상태 업데이트 후 로직은 useEffect[filters]에서 처리됨
+      const isTurningOn = !prev[key];
+      const next = { ...prev, [key]: isTurningOn };
+
+      if (isTurningOn) {
+        setSheetState(SHEET.MIN);
+      } else {
+        // 모든 주요 필터가 꺼졌는지 확인
+        const isAnyActive = next.hospital || next.pharmacy || next.sos || next.constore;
+        if (!isAnyActive) {
+          setSheetState(SHEET.CLOSED);
+          setSelectedPlace(null);
+        }
+      }
       return next;
     });
-
-    // 편의상 병원/약국 필터 켜면 시트 살짝 열기 (UX 결정사항)
-    if (key === "hospital" || key === "pharmacy") {
-      setSheetState(SHEET.MIN);
-    }
   };
 
   /* ------------------------------------------------------------------
@@ -118,12 +141,14 @@ export const MapMain = () => {
           const map = new kakao.maps.Map(container, options);
           mapInstance.current = map;
 
-          // 클러스터러 설정 보완 (모바일 밀집도 고려)
+          // 지오코더 초기화
+          geocoderRef.current = new kakao.maps.services.Geocoder();
+
           clustererRef.current = new kakao.maps.MarkerClusterer({
             map: map,
             averageCenter: true,
-            minLevel: 6, // 클러스터링 시작 레벨 조정
-            disableClickZoom: false, // 클릭 시 줌인 허용
+            minLevel: 5,
+            disableClickZoom: false,
             styles: [{
               width: '40px', height: '40px',
               background: 'rgba(51, 204, 255, .8)',
@@ -135,23 +160,17 @@ export const MapMain = () => {
             }]
           });
 
-          geocoderRef.current = new kakao.maps.services.Geocoder();
-
-          // 모바일 최적화 이벤트: 드래그 종료 및 확대/축소 시 즉시 갱신
           const handleMapIdle = () => {
             if (timerRef.current) clearTimeout(timerRef.current);
             timerRef.current = setTimeout(() => {
-              // 검색 모드(키워드 있음)일 때는 자동 갱신 중단 (검색 결과 유지)
               if (keywordRef.current && keywordRef.current.trim()) return;
-
               fetchMarkersInBounds();
-            }, 100); // 반응성 상향 (300ms -> 100ms)
+            }, 100);
           };
 
           kakao.maps.event.addListener(map, 'dragend', handleMapIdle);
           kakao.maps.event.addListener(map, 'zoom_changed', handleMapIdle);
 
-          // 이동할 때마다 마지막 위치 저장
           kakao.maps.event.addListener(map, 'idle', () => {
             const center = map.getCenter();
             localStorage.setItem("last_map_lat", center.getLat());
@@ -159,14 +178,18 @@ export const MapMain = () => {
           });
 
           kakao.maps.event.addListener(map, 'click', () => {
-            setSheetState(SHEET.CLOSED);
-            setSelectedPlace(null);
+            // FULL 상태에서 지도 클릭 시 MIN으로 먼저 내리고, 
+            // MIN 상태일 때 클릭해야 완전히 사라지게 수정
+            if (sheetStateRef.current === SHEET.FULL) {
+              setSheetState(SHEET.MIN);
+            } else {
+              setSheetState(SHEET.CLOSED);
+              setSelectedPlace(null);
+            }
           });
 
-          // 초기 로드 시퀀스 개선
           const initUserLocation = async () => {
             await moveToMyLocation();
-            // moveToMyLocation 내부에서 fetchMarkersInBounds 호출함
           };
 
           initUserLocation();
@@ -180,10 +203,8 @@ export const MapMain = () => {
     return () => {
       isMounted = false;
       if (timerRef.current) clearTimeout(timerRef.current);
-      // 리스너 제거는 카카오맵 API 특성상 인스턴스가 사라지면 자동 해제되거나,
-      // 명시적으로 removeListener를 해야하지만 여기서는 mapInstance가 ref로 관리되므로 생략하거나 추후 보강
     };
-  }, []); // Mount 시 1회
+  }, []);
 
   /* ------------------------------------------------------------------
      데이터 Fetching (Viewport Based)
@@ -194,21 +215,16 @@ export const MapMain = () => {
     const bounds = mapInstance.current.getBounds();
     const sw = bounds.getSouthWest();
     const ne = bounds.getNorthEast();
-
-    // 쿼리 파라미터
     const params = `?north=${ne.getLat()}&south=${sw.getLat()}&east=${ne.getLng()}&west=${sw.getLng()}`;
 
-    // API 호출 목록 (필터에 따라 요청 최소화 가능하지만, 일단 다 불러와서 클라이언트 필터링)
-    // 실제로는 서버 부하 줄이려면 filters 상태 보고 요청 여부 결정 권장
     const urls = [
       `${API_URL}/hospitals${params}`,
       `${API_URL}/pharmacies${params}`,
       `${API_URL}/convenience-stores${params}`,
-      `${API_URL}/hospitals/emergency${params}`, // 응급실 추가
+      `${API_URL}/hospitals/emergency${params}`,
     ];
 
     try {
-      console.log("Fetching map data with params:", params);
       const responses = await Promise.all(urls.map(u => fetch(u, {
         headers: { "Accept": "application/json" }
       }).catch(err => {
@@ -222,12 +238,8 @@ export const MapMain = () => {
       }));
 
       const [hospitals, pharmacies, stores, emergencies] = data;
-      console.log(`Loaded: H(${hospitals.length}), P(${pharmacies.length}), S(${stores.length}), E(${emergencies.length})`);
+      clearMarkers();
 
-      // 기존 마커 데이터 갱신
-      clearMarkers(); // 기존 마커 객체 제거 (메모리 관리)
-
-      // 새 마커 생성 (지도에 바로 올리지 않고 배열에 저장)
       const newMarkers = {
         hospital: createMarkerObjects(hospitals, "hospital"),
         pharmacy: createMarkerObjects(pharmacies, "pharmacy"),
@@ -236,8 +248,6 @@ export const MapMain = () => {
       };
 
       markersRef.current = newMarkers;
-
-      // 필터 적용하여 지도 및 리스트에 반영
       applyFilter();
 
     } catch (err) {
@@ -246,32 +256,35 @@ export const MapMain = () => {
   };
 
   /* 마커 객체 생성 헬퍼 */
+  const getPlaceId = (item) => `${item.name}-${item.lat}-${item.lng}`;
+
   const createMarkerObjects = (data, type) => {
-    if (!Array.isArray(data)) return [];
-
-    if (!window.kakao || !window.kakao.maps) return [];
-
-    const imageMap = {
-      hospital: hospitalIcon,
-      pharmacy: pharmacyIcon,
-      convenience: convIcon,
-      emergency: sosIcon,
-    };
-
-    const markerImage = new window.kakao.maps.MarkerImage(
-      imageMap[type],
-      new window.kakao.maps.Size(32, 32), // 모바일에서 클릭하기 쉽게 크기 상향 (24 -> 32)
-      { offset: new window.kakao.maps.Point(16, 16) }
-    );
+    if (!Array.isArray(data) || !window.kakao || !window.kakao.maps) return [];
 
     return data.map((item) => {
+      const pId = getPlaceId(item);
+      const isSelected = selectedPlace && getPlaceId(selectedPlace) === pId && selectedPlace.type === type;
+
+      const size = isSelected ? 28 : 18;
+      const offset = isSelected ? 14 : 9;
+
+      const markerImage = new window.kakao.maps.MarkerImage(
+        iconMap[type],
+        new window.kakao.maps.Size(size, size),
+        { offset: new window.kakao.maps.Point(offset, offset) }
+      );
+
       const marker = new window.kakao.maps.Marker({
         position: new window.kakao.maps.LatLng(item.lat, item.lng),
         image: markerImage,
       });
-      marker.data = { ...item, type }; // 데이터 바인딩
+      // 데이터 식별을 위해 pId와 type 저장
+      marker.data = { ...item, type, pId };
 
-      // 마커 클릭 시 상세 정보 바텀시트 열기
+      if (isSelected) {
+        selectedMarkerRef.current = marker;
+      }
+
       window.kakao.maps.event.addListener(marker, 'click', () => {
         setSelectedPlace({ ...item, type });
         setSheetState(SHEET.MIN);
@@ -286,6 +299,14 @@ export const MapMain = () => {
     if (clustererRef.current) {
       clustererRef.current.clear();
     }
+    clearAddressOverlay();
+  };
+
+  const clearAddressOverlay = () => {
+    if (addressOverlayRef.current) {
+      addressOverlayRef.current.setMap(null);
+      addressOverlayRef.current = null;
+    }
   };
 
   /* ------------------------------------------------------------------
@@ -293,41 +314,32 @@ export const MapMain = () => {
      ------------------------------------------------------------------ */
   const applyFilter = () => {
     if (!clustererRef.current) return;
-
-    clustererRef.current.clear(); // 클러스터 비우기
+    clustererRef.current.clear();
 
     let targets = [];
-    const currentFilters = filtersRef.current; // Ref에서 최신 상태 참조
+    const currentFilters = filtersRef.current;
 
-    // 필터 체크
     if (currentFilters.hospital) targets.push(...markersRef.current.hospital);
     if (currentFilters.pharmacy) targets.push(...markersRef.current.pharmacy);
     if (currentFilters.constore) targets.push(...markersRef.current.convenience);
     if (currentFilters.sos) targets.push(...markersRef.current.emergency);
 
-    // (선택) 키워드 검색 필터링
     const currentKeyword = keywordRef.current;
     if (currentKeyword && currentKeyword.trim()) {
       targets = targets.filter(m => m.data.name.includes(currentKeyword) || (m.data.address && m.data.address.includes(currentKeyword)));
     }
 
-    // 클러스터에 추가
     clustererRef.current.addMarkers(targets);
-
-    // BottomSheet(리스트)에 전달할 데이터 추출
     const visibleData = targets.map(m => m.data);
     setVisiblePlaces(visibleData);
   };
 
-  // 필터나 키워드 변경 시 재적용
   useEffect(() => {
-    // 키워드가 지워졌을 때(검색 취소) 다시 주변 탐색
     if (!keyword && !searchText) {
       if (mapInstance.current) fetchMarkersInBounds();
     }
     applyFilter();
   }, [filters, keyword]);
-
 
   /* ------------------------------------------------------------------
      검색 핸들러 (API 호출)
@@ -339,59 +351,88 @@ export const MapMain = () => {
       return;
     }
 
-    // 현재 지도 중심(또는 내 위치) 가져오기
-    let lat = DEFAULT_CENTER.lat;
-    let lng = DEFAULT_CENTER.lng;
+    let searchLat = DEFAULT_CENTER.lat;
+    let searchLng = DEFAULT_CENTER.lng;
     if (mapInstance.current) {
       const center = mapInstance.current.getCenter();
-      lat = center.getLat();
-      lng = center.getLng();
+      searchLat = center.getLat();
+      searchLng = center.getLng();
     }
 
-    try {
-      // API 호출 (radius는 백엔드에서 soft limit으로 사용되거나 distance sorting 유도)
-      const res = await fetch(`${API_URL}/search?keyword=${encodeURIComponent(kw)}&lat=${lat}&lng=${lng}&radius=5000`);
+    geocoderRef.current.addressSearch(kw, async (result, status) => {
+      if (status === window.kakao.maps.services.Status.OK) {
+        const addrData = result[0];
+        const moveLatLon = new window.kakao.maps.LatLng(addrData.y, addrData.x);
 
-      if (res.ok) {
-        const data = await res.json();
-
-        if (data.length === 0) {
-          alert(`'${kw}' 주변 검색 결과가 없습니다.\n지도를 이동하거나 검색어를 변경해보세요.`);
-          return;
-        }
-
-        // 결과 분류 및 마커 생성
-        const hospitals = data.filter(d => d.type === 'hospital');
-        const pharmacies = data.filter(d => d.type === 'pharmacy');
-        const stores = data.filter(d => d.type === 'convenience');
-        // search endpoint에서 emergency 타입이 별도로 오는지 확인 필요 (현재는 hospital type)
-
-        // 기존 마커 교체
         clearMarkers();
-        markersRef.current = {
-          hospital: createMarkerObjects(hospitals, 'hospital'),
-          pharmacy: createMarkerObjects(pharmacies, 'pharmacy'),
-          convenience: createMarkerObjects(stores, 'convenience'),
-          emergency: [] // 검색 결과에서는 응급실 구분 로직이 약할 수 있음
-        };
+        clearAddressOverlay();
 
-        setKeyword(kw); // 필터 적용 트리거
-
-        // 가장 가까운 결과로 지도 이동
-        if (data.length > 0 && mapInstance.current) {
-          const first = data[0];
-          const moveLatLon = new window.kakao.maps.LatLng(first.lat, first.lng);
-          mapInstance.current.panTo(moveLatLon);
-          // 너무 멀리 이동했으면 줌 조절?
-          // mapInstance.current.setLevel(5);
+        let roadAddr = "";
+        if (addrData.road_address) {
+          const { road_name, main_building_no, sub_building_no } = addrData.road_address;
+          roadAddr = `${road_name} ${main_building_no}${sub_building_no ? '-' + sub_building_no : ''}`;
+        } else {
+          roadAddr = addrData.address_name;
         }
-      }
-    } catch (err) {
-      console.error("Search Error:", err);
-      alert("검색 중 오류가 발생했습니다.");
-    }
-  };
 
+        const content = `
+          <div class="address-search-marker">
+            <div class="pin">
+              <div class="dot"></div>
+            </div>
+            <div class="label">${roadAddr}</div>
+          </div>
+        `;
+
+        addressOverlayRef.current = new window.kakao.maps.CustomOverlay({
+          position: moveLatLon,
+          content: content,
+          yAnchor: 1.1
+        });
+        addressOverlayRef.current.setMap(mapInstance.current);
+
+        mapInstance.current.setCenter(moveLatLon);
+        mapInstance.current.setLevel(3);
+
+        setKeyword(kw);
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_URL}/search?keyword=${encodeURIComponent(kw)}&lat=${searchLat}&lng=${searchLng}&radius=5000`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.length === 0) {
+            alert(`'${kw}' 주변 검색 결과가 없습니다.\n지도를 이동하거나 검색어를 변경해보세요.`);
+            return;
+          }
+
+          const hospitals = data.filter(d => d.type === 'hospital');
+          const pharmacies = data.filter(d => d.type === 'pharmacy');
+          const stores = data.filter(d => d.type === 'convenience');
+
+          clearMarkers();
+          markersRef.current = {
+            hospital: createMarkerObjects(hospitals, 'hospital'),
+            pharmacy: createMarkerObjects(pharmacies, 'pharmacy'),
+            convenience: createMarkerObjects(stores, 'convenience'),
+            emergency: []
+          };
+
+          setKeyword(kw);
+          setSheetState(SHEET.MIN);
+          if (data.length > 0 && mapInstance.current) {
+            const first = data[0];
+            const moveLatLon = new window.kakao.maps.LatLng(first.lat, first.lng);
+            mapInstance.current.panTo(moveLatLon);
+          }
+        }
+      } catch (err) {
+        console.error("Search Error:", err);
+        alert("검색 중 오류가 발생했습니다.");
+      }
+    });
+  };
 
   const moveToMyLocation = () => {
     const handleLocationSuccess = (lat, lng) => {
@@ -407,29 +448,23 @@ export const MapMain = () => {
         myLocationOverlayRef.current = new window.kakao.maps.CustomOverlay({
           position: loc,
           content: content,
-          zIndex: 5 // 마커보다 위에 표시
+          zIndex: 5
         });
         myLocationOverlayRef.current.setMap(mapInstance.current);
-
         fetchMarkersInBounds();
       }
     };
 
     const handleLocationError = (error) => {
       console.warn("Geolocation failed or denied. Using fallback center.", error);
-
-      // 1. 마지막 검색 위치 확인
       const lastLat = localStorage.getItem("last_map_lat");
       const lastLng = localStorage.getItem("last_map_lng");
-
       let fallbackLoc;
       if (lastLat && lastLng) {
         fallbackLoc = new window.kakao.maps.LatLng(Number(lastLat), Number(lastLng));
       } else {
-        // 2. 기본값 (서울시청)
         fallbackLoc = new window.kakao.maps.LatLng(DEFAULT_CENTER.lat, DEFAULT_CENTER.lng);
       }
-
       if (mapInstance.current) {
         mapInstance.current.setCenter(fallbackLoc);
         mapInstance.current.setLevel(4);
@@ -437,9 +472,7 @@ export const MapMain = () => {
       }
     };
 
-    // HTTPS 보안 환경 확인
     if (!window.isSecureContext && window.location.hostname !== 'localhost') {
-      console.warn("Geolocation requires HTTPS environment.");
       handleLocationError(new Error("Insecure Context"));
       return;
     }
@@ -448,52 +481,23 @@ export const MapMain = () => {
       navigator.geolocation.getCurrentPosition(
         (pos) => handleLocationSuccess(pos.coords.latitude, pos.coords.longitude),
         (err) => handleLocationError(err),
-        {
-          timeout: 5000,
-          enableHighAccuracy: true,
-          maximumAge: 0 // 항상 새로운 위치 정보 요청
-        }
+        { timeout: 5000, enableHighAccuracy: true, maximumAge: 0 }
       );
     } else {
       handleLocationError(new Error("Not supported"));
     }
   };
 
-  /* 도시 변경 핸들러 */
-  const handleCityChange = (cityName) => {
-    setCurrentCity(cityName);
-    if (!cityName) {
-      moveToMyLocation(); // 도시 해제 시 내 위치로
-      return;
-    }
-
-    if (!geocoderRef.current || !mapInstance.current) return;
-
-    geocoderRef.current.addressSearch(cityName, (result, status) => {
-      if (status === window.kakao.maps.services.Status.OK) {
-        const coords = new window.kakao.maps.LatLng(result[0].y, result[0].x);
-        mapInstance.current.setCenter(coords);
-        mapInstance.current.setLevel(6); // 적당한 줌 레벨
-        fetchMarkersInBounds(); // 이동 후 데이터 로딩
-      }
-    });
-  };
-
   /* 반경 원 그리기 */
   const updateRadiusCircle = () => {
     if (!mapInstance.current) return;
-
-    // 기존 원 제거
     if (radiusCircleRef.current) {
       radiusCircleRef.current.setMap(null);
     }
-
-    // 현재 지도 중심 기준 원 그리기
     const center = mapInstance.current.getCenter();
-
     radiusCircleRef.current = new window.kakao.maps.Circle({
       center: center,
-      radius: radius, // m 단위
+      radius: radius,
       strokeWeight: 1,
       strokeColor: '#75B8FA',
       strokeOpacity: 0.8,
@@ -504,30 +508,64 @@ export const MapMain = () => {
     radiusCircleRef.current.setMap(mapInstance.current);
   };
 
-  // Radius 변경 시 원 업데이트
   useEffect(() => {
     updateRadiusCircle();
   }, [radius]);
 
-  // 선택된 장소로 지도 이동
   useEffect(() => {
     if (selectedPlace && mapInstance.current) {
       const moveLatLon = new window.kakao.maps.LatLng(selectedPlace.lat, selectedPlace.lng);
       mapInstance.current.panTo(moveLatLon);
-      // 필요 시 줌 레벨 조정
-      // mapInstance.current.setLevel(3); 
+    }
+
+    // 마커 확대/축소 효과
+    // 1. 이전 선택된 마커 축소
+    if (selectedMarkerRef.current) {
+      const prev = selectedMarkerRef.current;
+      const type = prev.data.type;
+      const normalImage = new window.kakao.maps.MarkerImage(
+        iconMap[type],
+        new window.kakao.maps.Size(18, 18),
+        { offset: new window.kakao.maps.Point(9, 9) }
+      );
+      prev.setImage(normalImage);
+      selectedMarkerRef.current = null;
+    }
+
+    // 2. 새로운 선택된 마커 확대
+    if (selectedPlace) {
+      const allMarkers = [
+        ...markersRef.current.hospital,
+        ...markersRef.current.pharmacy,
+        ...markersRef.current.convenience,
+        ...markersRef.current.emergency
+      ];
+
+      const targetPId = getPlaceId(selectedPlace);
+      const target = allMarkers.find(
+        m => m.data.pId === targetPId && m.data.type === selectedPlace.type
+      );
+
+      if (target) {
+        const bigImage = new window.kakao.maps.MarkerImage(
+          iconMap[selectedPlace.type],
+          new window.kakao.maps.Size(28, 28),
+          { offset: new window.kakao.maps.Point(14, 14) }
+        );
+        target.setImage(bigImage);
+        selectedMarkerRef.current = target;
+      }
     }
   }, [selectedPlace]);
 
   return (
     <div className="map-main">
-      {/* 상단 UI */}
       <div className="map-top-ui">
         <div className="map-ui-inner">
           <InputBar
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            onSearch={handleSearch} // API 기반 검색 연결
+            onSearch={handleSearch}
             placeholder="병원, 약국 검색"
           />
           <FilterIconGroup
@@ -537,14 +575,11 @@ export const MapMain = () => {
         </div>
       </div>
 
-      {/* 내 위치 이동 버튼 */}
-
-      {/* 내 위치 이동 버튼 */}
       <button
         onClick={moveToMyLocation}
         style={{
           position: 'absolute',
-          bottom: '180px', // MapList 위쪽
+          bottom: '180px',
           right: '20px',
           zIndex: 20,
           width: '50px',
@@ -561,22 +596,20 @@ export const MapMain = () => {
         }}
         title="내 위치로 이동"
       >
-        🎯
+        <MyLocationIcon />
       </button>
 
-      {/* 지도 */}
       <div ref={mapContainerRef} className="kakao-map-layer" />
 
-      {/* ⭐ Bottom Sheet */}
-      <MapList
-        sheetState={sheetState}
-        setSheetState={setSheetState}
-        places={visiblePlaces} // 데이터 전달
-        selectedPlace={selectedPlace}
-        setSelectedPlace={setSelectedPlace}
-      />
-
-      {/* HomeBar removed (handled by MainLayout) */}
+      {sheetState !== SHEET.CLOSED && (
+        <MapList
+          sheetState={sheetState}
+          setSheetState={setSheetState}
+          places={visiblePlaces}
+          selectedPlace={selectedPlace}
+          setSelectedPlace={setSelectedPlace}
+        />
+      )}
     </div>
   );
 };

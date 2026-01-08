@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { API_BASE_URL } from "../../api/config";
 import { Warning } from "../Warning/Warning";
-import { Button } from "../Button/Button";
+import { CalendarIcon } from "../Icons";
 import "./style.css";
 
 const AddScheduleModal = ({ isOpen, onClose, defaultPillName }) => {
@@ -20,12 +20,18 @@ const AddScheduleModal = ({ isOpen, onClose, defaultPillName }) => {
     const [loading, setLoading] = useState(false);
     const [warningType, setWarningType] = useState(null);
 
+    // ⏰ 다중 복약 시간 상태
+    const [timings, setTimings] = useState([{ hour: '', minute: '', text: '' }]);
+
     useEffect(() => {
         if (isOpen) {
             setFormData(prev => ({
                 ...prev,
-                pill_name: defaultPillName || ""
+                pill_name: defaultPillName || "",
+                start_date: format(new Date(), 'yyyy-MM-dd'),
+                end_date: format(new Date(), 'yyyy-MM-dd'),
             }));
+            setTimings([{ hour: '', minute: '', text: '' }]);
             fetchUsers();
         }
     }, [isOpen, defaultPillName]);
@@ -85,13 +91,19 @@ const AddScheduleModal = ({ isOpen, onClose, defaultPillName }) => {
         }
 
         setLoading(true);
+        // ⏰ timings 배열 구성
+        const validTimings = timings
+            .filter(t => t.hour && t.minute)
+            .map(t => `${t.hour}:${t.minute}`);
+
         const payload = {
             user_id: selectedUserId,
             pill_name: formData.pill_name,
             dose: formData.dose,
             start_date: formData.start_date,
             end_date: formData.end_date,
-            timing: formData.timing,
+            timing: validTimings.length > 0 ? validTimings[0] : formData.timing,
+            timings: validTimings,
             meal_relation: null,
             memo: formData.memo,
             notify: true,
@@ -128,35 +140,99 @@ const AddScheduleModal = ({ isOpen, onClose, defaultPillName }) => {
             <div className="add-schedule-modal-overlay">
                 <div className="add-schedule-modal">
                     <div className="modal-header">
-                        <h3>Add Medication Schedule</h3>
+                        <h3>Add new Pill</h3>
                         <button className="close-btn" onClick={onClose}>×</button>
                     </div>
                     <div className="modal-content">
                         <div className="form-group">
-                            <label>pill name</label>
-                            <input name="pill_name" value={formData.pill_name} onChange={handleChange} placeholder="약 이름" />
+                            <label>Pill name*</label>
+                            <input name="pill_name" value={formData.pill_name} onChange={handleChange} placeholder="Pill name" />
                         </div>
                         <div className="form-group">
-                            <label>Dose (1정 등)</label>
-                            <input name="dose" value={formData.dose} onChange={handleChange} placeholder="예: 1정" />
+                            <label>dose</label>
+                            <input name="dose" value={formData.dose} onChange={handleChange} placeholder="dose" />
+                        </div>
+
+                        <div className="row-group">
+                            <div className="form-group half">
+                                <label>start date*</label>
+                                <input type="date" name="start_date" value={formData.start_date} onChange={handleChange} required />
+                                <div className="input-icon">
+                                    <CalendarIcon />
+                                </div>
+                            </div>
+                            <div className="form-group half">
+                                <label>end date*</label>
+                                <input type="date" name="end_date" value={formData.end_date} onChange={handleChange} required />
+                                <div className="input-icon">
+                                    <CalendarIcon />
+                                </div>
+                            </div>
                         </div>
 
                         <div className="form-group">
-                            <label>Start date</label>
-                            <input type="date" name="start_date" value={formData.start_date} onChange={handleChange} />
-                        </div>
-                        <div className="form-group">
-                            <label>End date</label>
-                            <input type="date" name="end_date" value={formData.end_date} onChange={handleChange} />
+                            <label>Timing (Max 5)</label>
+                            <div className="timing-list">
+                                {timings.map((t, idx) => (
+                                    <div key={idx} className="timing-row" style={{ display: 'flex', gap: '5px', marginBottom: '5px' }}>
+                                        <select
+                                            className="timing-select"
+                                            value={t.hour}
+                                            onChange={(e) => {
+                                                const newTimings = [...timings];
+                                                newTimings[idx].hour = e.target.value;
+                                                if (idx === timings.length - 1 && timings.length < 5 && e.target.value && newTimings[idx].minute) {
+                                                    newTimings.push({ hour: '', minute: '', text: '' });
+                                                }
+                                                setTimings(newTimings);
+                                            }}
+                                            style={{ flex: 1, padding: '8px', borderRadius: '8px', border: '1px solid #ddd', backgroundColor: '#F0EBFF' }}
+                                        >
+                                            <option value="">Hour</option>
+                                            {[...Array(24)].map((_, i) => {
+                                                const val = i.toString().padStart(2, '0');
+                                                return <option key={val} value={val}>{val}</option>;
+                                            })}
+                                        </select>
+                                        <span style={{ alignSelf: 'center' }}>:</span>
+                                        <select
+                                            className="timing-select"
+                                            value={t.minute}
+                                            onChange={(e) => {
+                                                const newTimings = [...timings];
+                                                newTimings[idx].minute = e.target.value;
+                                                if (idx === timings.length - 1 && timings.length < 5 && e.target.value && newTimings[idx].hour) {
+                                                    newTimings.push({ hour: '', minute: '', text: '' });
+                                                }
+                                                setTimings(newTimings);
+                                            }}
+                                            style={{ flex: 1, padding: '8px', borderRadius: '8px', border: '1px solid #ddd', backgroundColor: '#F0EBFF' }}
+                                        >
+                                            <option value="">Min</option>
+                                            {[0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55].map((i) => {
+                                                const val = i.toString().padStart(2, '0');
+                                                return <option key={val} value={val}>{val}</option>;
+                                            })}
+                                        </select>
+                                        {timings.length > 1 && (
+                                            <button
+                                                onClick={() => {
+                                                    const newTimings = timings.filter((_, i) => i !== idx);
+                                                    setTimings(newTimings);
+                                                }}
+                                                style={{ background: 'none', border: 'none', color: '#ff4444', cursor: 'pointer', marginLeft: '5px' }}
+                                            >
+                                                ✕
+                                            </button>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
                         </div>
 
-                        <div className="form-group">
-                            <label>timing (식후 30분 등)</label>
-                            <input name="timing" value={formData.timing} onChange={handleChange} placeholder="예: 식후 30분" />
-                        </div>
                         <div className="form-group">
                             <label>memo</label>
-                            <textarea name="memo" value={formData.memo} onChange={handleChange} rows={3} placeholder="메모 입력"></textarea>
+                            <textarea name="memo" value={formData.memo} onChange={handleChange} rows={2} placeholder="memo"></textarea>
                         </div>
 
                         <div className="form-group">

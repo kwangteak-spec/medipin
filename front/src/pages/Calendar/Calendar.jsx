@@ -1,15 +1,18 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom"; // ✅ useNavigate 추가
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth, isSameDay, parseISO, parse } from "date-fns";
+import { CalendarIcon } from "../../components/Icons";
 
 import { API_BASE_URL } from "../../api/config";
 /* 아이콘들 */
 import preIcon from "../Search_detail/pre_icon.svg";
+import { useAlarm } from "../../context/AlarmContext";
 import "./style.css";
 
 const Calendar = () => {
     const navigate = useNavigate(); // ✅ navigate 훅 추가
     const location = useLocation(); // ✅ Hook 선언 위치 교정 (최상단)
+    const { toggleOverlay } = useAlarm();
     // 날짜 상태
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState(new Date());
@@ -59,6 +62,7 @@ const Calendar = () => {
 
     // 수정 모드 상태
     const [editId, setEditId] = useState(null);
+    const [isDraggingList, setIsDraggingList] = useState(false);
 
     // 폼 상태
     const [formData, setFormData] = useState({
@@ -397,65 +401,52 @@ const Calendar = () => {
     });
 
     // --- 드래그 핸들러 (List) ---
-    const isDragging = useRef(false);
-
-    const handleListTouchStart = (e) => {
-        isDragging.current = true;
-        dragStartY.current = e.targetTouches[0].clientY;
-        dragStartHeight.current = sheetHeight;
-    };
-
-    const handleListTouchMove = (e) => {
-        if (!isDragging.current) return;
-        const currentY = e.targetTouches[0].clientY;
-        const deltaY = currentY - dragStartY.current;
-        const deltaVh = (deltaY / window.innerHeight) * 100;
-        let newHeight = dragStartHeight.current - deltaVh;
-
-        // 제한 범위 - 최소값 0으로 변경
-        if (newHeight < 0) newHeight = 0;
-        if (newHeight > 85) newHeight = 85;
-        setSheetHeight(newHeight);
-    };
-
-    const handleListTouchEnd = () => {
-        isDragging.current = false;
-    };
-
-    // 마우스 이벤트 (데스크톱)
-    const handleListMouseDown = (e) => {
-        isDragging.current = true;
-        dragStartY.current = e.clientY;
+    const handleListStart = (e) => {
+        setIsDraggingList(true);
+        const y = e.touches ? e.touches[0].clientY : e.clientY;
+        dragStartY.current = y;
         dragStartHeight.current = sheetHeight;
     };
 
     useEffect(() => {
-        const handleMouseMove = (e) => {
-            if (!isDragging.current) return;
-            const currentY = e.clientY;
-            const deltaY = currentY - dragStartY.current;
+        if (!isDraggingList) return;
+
+        const handleMove = (e) => {
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            const deltaY = dragStartY.current - clientY;
             const deltaVh = (deltaY / window.innerHeight) * 100;
-            let newHeight = dragStartHeight.current - deltaVh;
+            let newHeight = dragStartHeight.current + deltaVh;
 
             if (newHeight < 0) newHeight = 0;
             if (newHeight > 85) newHeight = 85;
             setSheetHeight(newHeight);
         };
 
-        const handleMouseUp = () => {
-            isDragging.current = false;
+        const handleEnd = () => {
+            setIsDraggingList(false);
+
+            // 스냅 로직 (간단화)
+            if (sheetHeight < 15) {
+                setSheetHeight(0);
+            } else if (sheetHeight < 50) {
+                setSheetHeight(30);
+            } else {
+                setSheetHeight(85);
+            }
         };
 
-        if (isDragging.current) {
-            window.addEventListener("mousemove", handleMouseMove);
-            window.addEventListener("mouseup", handleMouseUp);
-        }
+        window.addEventListener("mousemove", handleMove);
+        window.addEventListener("mouseup", handleEnd);
+        window.addEventListener("touchmove", handleMove, { passive: false });
+        window.addEventListener("touchend", handleEnd);
 
         return () => {
-            window.removeEventListener("mousemove", handleMouseMove);
-            window.removeEventListener("mouseup", handleMouseUp);
+            window.removeEventListener("mousemove", handleMove);
+            window.removeEventListener("mouseup", handleEnd);
+            window.removeEventListener("touchmove", handleMove);
+            window.removeEventListener("touchend", handleEnd);
         };
-    }, [sheetHeight]);
+    }, [isDraggingList, sheetHeight]);
 
     // --- 드래그 핸들러 (Add) ---
     const handleAddStart = (clientY) => {
@@ -563,22 +554,17 @@ const Calendar = () => {
         }, 300);
     };
 
-    /* Icons */
-    const BackIcon = () => (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M15 18L9 12L15 6" stroke="#333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-    );
+    /* Icons integrated from ../../components/Icons */
 
     return (
         <div className="calendar-page">
             {/* New Header */}
             <div className="calendar-page-header">
-                <button onClick={() => navigate(-1)} className="calendar-back-btn">
-                    <BackIcon />
-                </button>
+                <div style={{ width: 56 }}></div>
                 <div className="header-title">Calendar</div>
-                <div style={{ width: 24 }}></div>
+                <div className="icon-wrapper" onClick={toggleOverlay}>
+                    <div className="icon-alarm" />
+                </div>
             </div>
 
             <div className="calendar-content-sheet"
@@ -638,18 +624,15 @@ const Calendar = () => {
                 />
             )}
 
-            {/* --- 스케줄 리스트 시트 --- */}
             <div
                 className="schedule-sheet"
-                style={{ height: `${sheetHeight}vh`, transition: 'height 0.1s linear' }}
+                style={{ height: `${sheetHeight}vh`, transition: isDraggingList ? 'none' : 'height 0.3s ease-out' }}
                 ref={listSheetRef}
             >
                 <div
                     className="sheet-handle-bar"
-                    onTouchStart={handleListTouchStart}
-                    onTouchMove={handleListTouchMove}
-                    onTouchEnd={handleListTouchEnd}
-                    onMouseDown={handleListMouseDown}
+                    onTouchStart={handleListStart}
+                    onMouseDown={handleListStart}
                 >
                     <div className="handle"></div>
                 </div>
@@ -725,12 +708,18 @@ const Calendar = () => {
                     </div>
                     <div className="row-group">
                         <div className="form-group half">
-                            <label>start date</label>
-                            <input type="date" name="start_date" value={formData.start_date} onChange={handleFormChange} />
+                            <label>start date*</label>
+                            <input type="date" name="start_date" value={formData.start_date} onChange={handleFormChange} required />
+                            <div className="input-icon">
+                                <CalendarIcon />
+                            </div>
                         </div>
                         <div className="form-group half">
-                            <label>end date</label>
-                            <input type="date" name="end_date" value={formData.end_date} onChange={handleFormChange} />
+                            <label>end date*</label>
+                            <input type="date" name="end_date" value={formData.end_date} onChange={handleFormChange} required />
+                            <div className="input-icon">
+                                <CalendarIcon />
+                            </div>
                         </div>
                     </div>
                     <div className="form-group">

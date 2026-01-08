@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useState } from "react";
 import PropTypes from "prop-types";
 
 import HospitalIcon from "./Hospital_icon.svg";
@@ -11,8 +11,39 @@ import FavoritesIcon from "./Favorites_icon.svg";
 import "./style.css";
 
 const FilterIconGroup = ({ filters, onToggle, className = "" }) => {
+  const scrollRef = useRef(null);
+  const [isDrag, setIsDrag] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+
+  const onDragStart = (e) => {
+    e.preventDefault();
+    setIsDrag(true);
+    setStartX(e.pageX - scrollRef.current.offsetLeft);
+    setScrollLeft(scrollRef.current.scrollLeft);
+  };
+
+  const onDragEnd = () => {
+    setIsDrag(false);
+  };
+
+  const onDragMove = (e) => {
+    if (!isDrag) return;
+    e.preventDefault();
+    const x = e.pageX - scrollRef.current.offsetLeft;
+    const walk = (x - startX) * 2; // 스크롤 속도 배율
+    scrollRef.current.scrollLeft = scrollLeft - walk;
+  };
+
   return (
-    <div className={`filter-icon-group ${className}`}>
+    <div
+      className={`filter-icon-group ${className}`}
+      ref={scrollRef}
+      onMouseDown={onDragStart}
+      onMouseMove={onDragMove}
+      onMouseUp={onDragEnd}
+      onMouseLeave={onDragEnd}
+    >
       {/* 병원 */}
       <div
         className={`filter-item ${filters.hospital ? "active" : ""}`}
