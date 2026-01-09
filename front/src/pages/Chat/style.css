@@ -1,42 +1,48 @@
 .chatting-main {
-  background-color: #f9f9fb;
-  min-height: 100vh;
   width: 100%;
+  height: 100vh;
   position: relative;
   overflow: hidden;
-  font-family: 'Inter', sans-serif;
+  background-color: #f9f9fb;
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* Center content like SearchMain */
 }
 
 /* Chat UI Container */
 .chat-ui {
   position: absolute;
-  top: 130px;
-  /* Below Element */
+  top: 115px;
+  /* 100px Header + 15px Gap */
   width: 361px;
-  /* Align with search-ui */
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 190px);
-  /* Adjust for header and navbar */
+  height: calc(100vh - 110px);
+  padding-bottom: 110px;
+  box-sizing: border-box;
   z-index: 10;
+  background-color: transparent;
+  border-radius: 30px 30px 0 0;
 }
 
-/* History Mode Overrides (List and Detail) */
-.chat-ui.history-mode {
-  top: 190px;
-  /* Adjust for the taller header (180px) */
-  height: calc(100vh - 270px);
+/* Specific adjustment for taller search header in history list */
+.chat-ui.search-header-mode {
+  top: 182px;
+  /* 167px Header + 15px Gap */
+  height: calc(100vh - 182px);
 }
 
 /* Specific adjustment when tabs are hidden in detail view */
 .chat-ui.history-detail-mode {
-  padding-top: 20px;
+  top: 115px;
+  /* 100px Header + 15px Gap */
+  height: calc(100vh - 110px);
+}
+
+.chat-ui.history-detail-mode .chat-content-area {
+  padding-bottom: 0px;
 }
 
 
@@ -90,8 +96,14 @@
 .chat-content-area {
   flex: 1;
   overflow-y: auto;
-  padding-bottom: 120px;
-  /* Space for input */
+  padding-bottom: 20px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.chat-content-area::-webkit-scrollbar {
+  display: none;
+  /* Chrome, Safari, Opera */
 }
 
 /* Suggestion Layout */
@@ -165,6 +177,32 @@
   gap: 10px;
 }
 
+.message-wrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+}
+
+.message-wrapper.user {
+  justify-content: flex-end;
+}
+
+.mini-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+.user-placeholder {
+  background-color: #ddd;
+  background-image: url('https://api.dicebear.com/7.x/avataaars/svg?seed=Felix');
+  /* Example avatar */
+  background-size: cover;
+}
+
 .message-bubble {
   display: flex;
   margin-bottom: 10px;
@@ -220,6 +258,18 @@
   align-items: center;
 }
 
+/* History Detail Input Clean-up */
+.input-section.history-detail-input {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  padding: 10px 0 30px 0;
+  border: none !important;
+}
+
+.input-section.history-detail-input .input-label {
+  display: none;
+}
+
 .input-label {
   text-align: center;
   color: #888;
@@ -247,9 +297,10 @@
   flex: 1;
   border: none;
   background: transparent;
-  outline: none;
+  padding: 15px 25px;
+  border-radius: 30px;
   font-size: 14px;
-  color: #333;
+  outline: none;
 }
 
 .send-button {
@@ -329,11 +380,12 @@
   color: #333;
 }
 
-.info-top {
-  display: flex;
-  justify-content: flex-end;
-  /* Align meta info to right */
-  align-items: center;
+@media (max-width: 400px) {
+  .item-meta {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+  }
 }
 
 .item-meta {
@@ -396,9 +448,11 @@
 }
 
 .loading-history,
-.setting-placeholder {
-  padding: 40px;
+.setting-placeholder,
+.empty-history {
+  padding: 80px 40px;
   text-align: center;
   color: #888;
-  font-size: 14px;
+  font-size: 15px;
+  line-height: 1.6;
 }

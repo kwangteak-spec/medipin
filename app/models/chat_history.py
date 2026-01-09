@@ -10,4 +10,5 @@ class ChatHistory(Base):
     message = Column(Text, nullable=False)
     sender = Column(String(10), nullable=False) # 'user' or 'bot'
     is_read = Column(Boolean, default=False)
+    conversation_id = Column(String(50), nullable=True) # group ID for messages
     created_at = Column(TIMESTAMP, server_default=func.now())

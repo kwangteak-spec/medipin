@@ -59,15 +59,15 @@ export const ChatHistory = () => {
         }
     };
 
-    const handleDelete = async (e, historyId) => {
-        e.stopPropagation(); // Prevent navigation to chat
-        if (!window.confirm("이 대화 내역을 삭제하시겠습니까?")) return;
+    const handleDelete = async (e, conversationId) => {
+        e.stopPropagation(); // Prevent navigation
+        if (!window.confirm("이 대화 내역을 전체 삭제하시겠습니까?")) return;
 
         const token = localStorage.getItem("authToken");
         if (!token) return;
 
         try {
-            const response = await fetch(`${API_BASE_URL}/chatbot/history/${historyId}`, {
+            const response = await fetch(`${API_BASE_URL}/chatbot/conversation/${conversationId}`, {
                 method: "DELETE",
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -75,8 +75,11 @@ export const ChatHistory = () => {
             });
 
             if (response.ok) {
-                // Remove from local state
-                setHistory(prev => prev.filter(item => item.id !== historyId));
+                // Remove all messages with this conversationId from local state
+                setHistory(prev => prev.filter(item => {
+                    const cid = item.conversation_id || 'default';
+                    return cid !== conversationId;
+                }));
             } else {
                 alert("삭제에 실패했습니다.");
             }
@@ -97,54 +100,94 @@ export const ChatHistory = () => {
     // If there's an error or no history, handle empty state
     const hasHistory = history && history.length > 0;
 
-    const displayHistory = hasHistory ? history.map((item, index) => ({
-        id: item.id || index,
-        message: item.message,
-        time: formatTime(item.created_at),
-        unread: !item.is_read && item.sender === 'bot' ? 1 : 0,
-        sender: item.sender
-    })) : [
-        { id: 1, message: "아직 대화 내역이 없습니다. 메시지를 보내보세요!", time: "now", unread: 0, sender: 'bot' }
-    ];
+    const displayHistory = [];
+    if (hasHistory) {
+        // Group messages by conversation_id
+        const groups = {};
+        history.forEach(item => {
+            const cid = item.conversation_id || 'default';
+            if (!groups[cid]) {
+                groups[cid] = {
+                    id: cid,
+                    name: "메디핀 AI",
+                    messages: [],
+                    latest_at: item.created_at
+                };
+            }
+            groups[cid].messages.push(item);
+            if (new Date(item.created_at) > new Date(groups[cid].latest_at)) {
+                groups[cid].latest_at = item.created_at;
+            }
+        });
+
+        // Convert groups to display format and sort by latest
+        Object.values(groups).sort((a, b) => new Date(b.latest_at) - new Date(a.latest_at)).forEach(group => {
+            const latestMsg = group.messages.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
+            const unreadCount = group.messages.reduce((sum, m) => sum + (!m.is_read && m.sender === 'bot' ? 1 : 0), 0);
+
+            displayHistory.push({
+                id: group.id,
+                name: group.name,
+                message: latestMsg.message,
+                time: formatTime(latestMsg.created_at),
+                unread: unreadCount,
+                sender: 'bot'
+            });
+        });
+    } else {
+        displayHistory.push({
+            id: 'empty',
+            name: "메디핀 AI",
+            message: "아직 대화 내역이 없습니다. 메시지를 보내보세요!",
+            time: "now",
+            unread: 0,
+            sender: 'bot'
+        });
+    }
 
 
     return (
         <div className="history-container">
-            <div className="history-list">
-                {displayHistory.map((item) => (
-                    <div
-                        key={item.id}
-                        className={`history-item ${item.sender}`}
-                        onClick={() => navigate("/chat?history=true")}
-                        style={{ cursor: "pointer" }}
-                    >
-                        <div className="avatar-section">
-                            {item.sender === 'bot' && (
+            {!hasHistory ? (
+                <div className="empty-history">
+                    아직 대화 내역이 없습니다.<br /> 메세지를 입력해주세요
+                </div>
+            ) : (
+                <div className="history-list">
+                    {displayHistory.map((item) => (
+                        <div
+                            key={item.id}
+                            className={`history-item bot`}
+                            onClick={() => navigate(`/chat?history=true&cid=${item.id}`)}
+                            style={{ cursor: "pointer" }}
+                        >
+                            <div className="avatar-section">
                                 <img src={bearIcon} alt="Avatar" className="bear-avatar" />
-                            )}
-                        </div>
-                        <div className="info-section">
-                            <div className="info-top">
-                                <div className="item-meta">
-                                    <button
-                                        className="delete-button"
-                                        onClick={(e) => handleDelete(e, item.id)}
-                                    >
-                                        ✕
-                                    </button>
-                                    <span className="item-time">{item.time}</span>
+                            </div>
+                            <div className="info-section">
+                                <div className="info-top">
+                                    <span className="item-name">{item.name}</span>
+                                    <div className="item-meta">
+                                        <button
+                                            className="delete-button"
+                                            onClick={(e) => handleDelete(e, item.id)}
+                                        >
+                                            ✕
+                                        </button>
+                                        <span className="item-time">{item.time}</span>
+                                    </div>
+                                </div>
+                                <div className="info-bottom">
+                                    <div className="item-message">{item.message}</div>
+                                    {item.unread > 0 && (
+                                        <div className="unread-bubble">{formatUnreadCount(item.unread)}</div>
+                                    )}
                                 </div>
                             </div>
-                            <div className="info-bottom">
-                                <div className="item-message">{item.message}</div>
-                                {item.unread > 0 && (
-                                    <div className="unread-bubble">{formatUnreadCount(item.unread)}</div>
-                                )}
-                            </div>
                         </div>
-                    </div>
-                ))}
-            </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 };

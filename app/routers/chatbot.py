@@ -33,10 +33,11 @@ def chatbot_query(
         )
 
     try:
-        response_text = generate_chatbot_response(
+        result = generate_chatbot_response(
             db, 
             user_id=current_user.id, 
-            question=payload.question
+            question=payload.question,
+            conversation_id=payload.conversation_id
         )
     except Exception as e:
         # 서비스 레이어에서 발생한 오류 처리
@@ -46,7 +47,7 @@ def chatbot_query(
             detail=f"챗봇 서비스 처리 중 오류가 발생했습니다: {e}" 
         )
     
-    return {"response": response_text}
+    return result
 
 @chatbot_router.get("/history")
 def get_chatbot_history(
@@ -85,6 +86,36 @@ def mark_as_read(
         ChatHistory.is_read == False,
         ChatHistory.sender == "bot"
     ).update({"is_read": True})
+    
+    db.commit()
+    return {"status": "success"}
+
+@chatbot_router.delete("/conversation/{conversation_id}")
+def delete_conversation(
+    conversation_id: str,
+    db: Session = Depends(get_db),
+    current_user: UserProfile = Depends(get_current_user)
+):
+    """
+    특정 대화 세션(conversation_id) 전체를 삭제합니다.
+    """
+    if not current_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="로그인이 필요합니다."
+        )
+
+    # 기본값 'default' 처리 (cid가 없는 레거시 데이터 대응)
+    if conversation_id == "default":
+        db.query(ChatHistory).filter(
+            ChatHistory.user_id == current_user.id,
+            ChatHistory.conversation_id == None
+        ).delete()
+    else:
+        db.query(ChatHistory).filter(
+            ChatHistory.user_id == current_user.id,
+            ChatHistory.conversation_id == conversation_id
+        ).delete()
     
     db.commit()
     return {"status": "success"}

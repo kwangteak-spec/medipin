@@ -6,10 +6,12 @@ from typing import List, Optional
 class ChatRequest(BaseModel):
     """ 챗봇에게 질문할 내용을 담는 요청 스키마 """
     question: str
+    conversation_id: Optional[str] = None
     
 class ChatResponse(BaseModel):
     """ 챗봇의 답변을 담는 응답 스키마 """
     response: str
+    conversation_id: Optional[str] = None
 
 class ScheduleEntry(BaseModel):
     """ 등록/수정할 복용 시간과 용량 """

@@ -225,18 +225,22 @@ def get_best_model():
     print("[DEBUG] ⚠️ Using default fallback: gemini-pro")
     return 'gemini-pro'
 
-def generate_chatbot_response(db: Session, user_id: int, question: str) -> str:
+def generate_chatbot_response(db: Session, user_id: int, question: str, conversation_id: Optional[str] = None) -> Dict[str, Any]:
     from app.models.chat_history import ChatHistory
+    import uuid
+
+    if not conversation_id:
+        conversation_id = str(uuid.uuid4())
 
     # 0. Save User Question to DB
-    user_msg = ChatHistory(user_id=user_id, message=question, sender="user")
+    user_msg = ChatHistory(user_id=user_id, message=question, sender="user", conversation_id=conversation_id)
     db.add(user_msg)
     db.commit()
     
     # 1. 사용자 정보
     user_summary = get_user_summary(db, user_id)
     if not user_summary:
-        return "사용자 정보를 찾을 수 없습니다. 다시 로그인해 주세요."
+        return {"response": "사용자 정보를 찾을 수 없습니다. 다시 로그인해 주세요.", "conversation_id": conversation_id}
     
     name = user_summary['name']
     age = user_summary['age']
@@ -244,11 +248,6 @@ def generate_chatbot_response(db: Session, user_id: int, question: str) -> str:
     
     # 2. RAG Context 구성
     rag_data = fetch_rag_context(db, user_id, question)
-    
-    # 3. 프롬프트 작성 (기존 코드 유지)
-    # ... 코드 블록 생략 불가하므로 여기에 다시 포함하거나, 
-    # replace 범위를 조정해야 함.
-    # 사용자의 시스템 프롬프트가 이전에 정의됨.
     
     system_prompt = f"""
     당신은 친절하고 전문적인 의료 보조 챗봇입니다. 
@@ -286,33 +285,23 @@ def generate_chatbot_response(db: Session, user_id: int, question: str) -> str:
              api_key = os.getenv("GEMINI_API_KEY")
         
         if api_key:
-            # 1. API 키 설정 (필수)
             genai.configure(api_key=api_key)
-            
-            masked = api_key[:4] + "****" + api_key[-4:] if len(api_key) > 8 else "****"
-            print(f"[DEBUG] Using API Key: {masked}")
-            
-            # 2. 모델 자동 선택
             model_name = get_best_model()
             model = genai.GenerativeModel(model_name)
         else:
-            print("[ERROR] GEMINI_API_KEY is missing!")
-            return "챗봇 엔진 API 키가 설정되지 않았습니다."
+            return {"response": "챗봇 엔진 API 키가 설정되지 않았습니다.", "conversation_id": conversation_id}
 
         full_prompt = f"{system_prompt}\n\n{user_prompt}"
-        
-        print(f"[DEBUG] Generating content with {model_name or 'default'}...")
         response = model.generate_content(full_prompt)
         
         try:
             text_response = response.text.strip()
         except ValueError:
-            print(f"[WARN] Response blocked: {response.prompt_feedback}")
             text_response = "죄송합니다. 안전 정책에 의해 답변이 차단되었습니다."
-            bot_msg = ChatHistory(user_id=user_id, message=text_response, sender="bot")
+            bot_msg = ChatHistory(user_id=user_id, message=text_response, sender="bot", conversation_id=conversation_id)
             db.add(bot_msg)
             db.commit()
-            return text_response
+            return {"response": text_response, "conversation_id": conversation_id}
 
         # JSON 응답 감지 및 처리
         if "REGISTER_SCHEDULE" in text_response:
@@ -322,39 +311,26 @@ def generate_chatbot_response(db: Session, user_id: int, question: str) -> str:
                     data = json.loads(match.group())
                     if data.get("intent") == "REGISTER_SCHEDULE":
                         final_response = create_schedule(db, user_id, data, name)
-                        # Save Bot's final confirmation to history
-                        bot_msg = ChatHistory(user_id=user_id, message=final_response, sender="bot")
+                        bot_msg = ChatHistory(user_id=user_id, message=final_response, sender="bot", conversation_id=conversation_id)
                         db.add(bot_msg)
                         db.commit()
-                        return final_response
-            except Exception as e:
-                print(f"JSON Parsing Error: {e}")
+                        return {"response": final_response, "conversation_id": conversation_id}
+            except:
                 pass
 
-        # Regular Bot Response (not schedule)
-        bot_msg = ChatHistory(user_id=user_id, message=text_response, sender="bot")
+        bot_msg = ChatHistory(user_id=user_id, message=text_response, sender="bot", conversation_id=conversation_id)
         db.add(bot_msg)
         db.commit()
 
-        return text_response
+        return {"response": text_response, "conversation_id": conversation_id}
         
     except Exception as e:
         error_msg = str(e)
-        print(f"!!! Gemini API Error !!!: {error_msg}")
-        traceback.print_exc()
-        
         final_error = f"문제 발생: {error_msg[:50]}..."
-        if "404" in error_msg:
-             final_error = f"모델을 찾을 수 없습니다. (Selected: {SELECTED_MODEL_NAME})"
-        elif "429" in error_msg:
-            final_error = "사용량이 많아 잠시 후 다시 시도해 주세요. (429 Too Many Requests)"
-            
-        # Save Error message as Bot response so it shows in history
         try:
-            bot_msg = ChatHistory(user_id=user_id, message=final_error, sender="bot")
+            bot_msg = ChatHistory(user_id=user_id, message=final_error, sender="bot", conversation_id=conversation_id)
             db.add(bot_msg)
             db.commit()
         except:
             pass
-            
-        return final_error
+        return {"response": final_error, "conversation_id": conversation_id}

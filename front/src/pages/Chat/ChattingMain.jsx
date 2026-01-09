@@ -15,11 +15,10 @@ const ChattingMain = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-
-
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [currentConversationId, setCurrentConversationId] = useState(null);
 
   const location = useLocation();
   const activeTab = location.pathname.startsWith("/chat/history") ? "History" :
@@ -43,12 +42,20 @@ const ChattingMain = () => {
   const fetchMessages = async () => {
     const token = localStorage.getItem("authToken");
     if (!token) return;
+    const cidFromParams = searchParams.get("cid");
     try {
       const response = await fetch(`${API_BASE_URL}/chatbot/history`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (response.ok) {
-        const data = await response.json();
+        let data = await response.json();
+
+        // Filter by conversation_id if provided
+        if (cidFromParams) {
+          data = data.filter(m => m.conversation_id === cidFromParams || (!m.conversation_id && cidFromParams === 'default'));
+          setCurrentConversationId(cidFromParams);
+        }
+
         // data is desc by created_at, so reverse to show oldest first in chat flow
         const formatted = data.reverse().map(m => ({
           text: m.message,
@@ -68,6 +75,7 @@ const ChattingMain = () => {
         fetchMessages();
       } else {
         setMessages([]); // Clear for fresh look
+        setCurrentConversationId(null); // Reset for new conversation thread
       }
       markMessagesAsRead();
     }
@@ -93,6 +101,18 @@ const ChattingMain = () => {
     const currentQuestion = inputValue;
     const userMessage = { text: currentQuestion, sender: "user" };
 
+    // New conversation check
+    let cid = currentConversationId;
+    const isNewChat = searchParams.get("history") !== "true";
+
+    if (isNewChat) {
+      // Create a temporary ID to navigate immediately
+      cid = crypto.randomUUID();
+      setCurrentConversationId(cid);
+      // Navigate immediately so UI changes to History Detail mode
+      navigate(`/chat?history=true&cid=${cid}`, { replace: true });
+    }
+
     setMessages((prev) => [...prev, userMessage]);
     setInputValue("");
     setIsLoading(true);
@@ -104,7 +124,10 @@ const ChattingMain = () => {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`
         },
-        body: JSON.stringify({ question: currentQuestion }),
+        body: JSON.stringify({
+          question: currentQuestion,
+          conversation_id: cid
+        }),
       });
 
       if (response.status === 401) {
@@ -134,9 +157,19 @@ const ChattingMain = () => {
 
   return (
     <div className="chatting-main">
-      <Element variant={(activeTab === "History" || searchParams.get("history") === "true") ? "chat-list" : "alarm"} />
+      <Element
+        variant={
+          searchParams.get("history") === "true"
+            ? "back"
+            : activeTab === "History"
+              ? "search"
+              : "alarm"
+        }
+        title={searchParams.get("history") === "true" ? "" : undefined}
+        onBackClick={searchParams.get("history") === "true" ? () => navigate("/chat/history") : null}
+      />
 
-      <div className={`chat-ui ${activeTab === "History" || searchParams.get("history") === "true" ? "history-mode" : ""} ${searchParams.get("history") === "true" ? "history-detail-mode" : ""}`}>
+      <div className={`chat-ui ${activeTab === "History" || searchParams.get("history") === "true" ? "history-mode" : ""} ${searchParams.get("history") === "true" ? "history-detail-mode" : ""} ${activeTab === "History" && searchParams.get("history") !== "true" ? "search-header-mode" : ""}`}>
         {activeTab === "Chat" && searchParams.get("history") !== "true" && <h1 className="page-title">Chat AI</h1>}
 
         {searchParams.get("history") !== "true" && (
@@ -215,10 +248,10 @@ const ChattingMain = () => {
         </div>
       </div>
 
-      {/* Input Area - Only show in Chat tab */}
-      {activeTab === "Chat" && (
-        <div className="input-section">
-          <div className="input-label">What would you like to know?</div>
+      {/* Input Area - show in Chat tab or History Detail mode */}
+      {(activeTab === "Chat" || searchParams.get("history") === "true") && (
+        <div className={`input-section ${searchParams.get("history") === "true" ? "history-detail-input" : ""}`}>
+          {searchParams.get("history") !== "true" && <div className="input-label">What would you like to know?</div>}
           <div className="input-wrapper">
             <input
               type="text"
@@ -238,11 +271,8 @@ const ChattingMain = () => {
         </div>
       )}
 
-      {/* Bottom Navigation */}
-      <div className="home-bar-container">
-        <HomeBar />
-      </div>
-    </div >
+      {/* Redundant HomeBar removed from here as MainLayout handles it */}
+    </div>
   );
 };
 
