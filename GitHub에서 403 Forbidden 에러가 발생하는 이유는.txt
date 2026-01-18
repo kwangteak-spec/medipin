@@ -1,0 +1,51 @@
+GitHub에서 **403 Forbidden** 에러가 발생하는 이유는 현재 컴퓨터에 저장된 GitHub 자격 증명이 `kwangteak-spec` 계정으로 설정되어 있어, `yyi2959` 저장소에 접근(Push 등)할 권한이 없기 때문입니다.
+
+가장 빠르고 확실한 해결 방법 3가지를 정리해 드립니다.
+
+---
+
+### 1. Windows 자격 증명 관리자에서 기존 계정 삭제
+
+Windows에 저장된 이전 계정 정보를 지우고 다시 로그인하는 방법입니다.
+
+1. Windows 검색창에 **'자격 증명 관리자'**를 검색해 실행합니다.
+2. **Windows 자격 증명** 탭을 선택합니다.
+3. `git:https://github.com/` 항목을 찾아 **제거**합니다.
+4. 다시 VS Code 터미널에서 `git push`를 시도하면 새로운 로그인 창이 뜹니다. 이때 권한이 있는 계정으로 로그인하세요.
+
+### 2. 원격 URL에 사용자 이름 직접 지정
+
+현재 프로젝트의 원격 저장소 주소에 사용자 이름을 강제로 넣어 인식시키는 방법입니다.
+
+```powershell
+# 기존 원격지 제거
+git remote remove origin
+
+# 새 계정 정보를 포함하여 원격지 추가 (yyi2959는 저장소 소유자 계정)
+git remote add origin https://yyi2959@github.com/yyi2959/medipin.git
+
+```
+
+이후 `git push -u origin main`을 실행하면 비밀번호(또는 Token)를 묻는 창이 나타납니다.
+
+### 3. Personal Access Token (PAT) 사용 (권장)
+
+GitHub은 보안상 일반 비밀번호 대신 **Token** 사용을 권장합니다.
+
+1. **GitHub 웹사이트** > Settings > Developer settings > Personal access tokens > **Tokens (classic)**에서 토큰을 생성합니다. (repo 권한 체크 필수)
+2. 생성된 토큰을 복사해둡니다.
+3. 터미널에 아래 명령어를 입력하여 토큰을 포함한 URL로 업데이트합니다.
+```powershell
+git remote set-url origin https://사용자이름:토큰값@github.com/yyi2959/medipin.git
+
+```
+
+
+
+---
+
+### 💡 OCR 작업 관련 추가 팁
+
+이전 질문에서 PaddleOCR 결과가 계속 나오지 않았던 부분은, 현재 터미널이 **D 드라이브**(`D:\medipin`)로 바뀌어 있습니다. OCR 코드가 있던 **F 드라이브**(`F:\ocr`) 폴더로 이동한 뒤에 파이썬 스크립트를 실행해야 정상적으로 `image.png`를 찾아 분석할 수 있습니다.
+
+**계정 전환 후 Push가 성공하셨나요? 아니면 여전히 권한 에러가 뜨나요?** 결과 알려주시면 다음 단계 도와드릴게요.
